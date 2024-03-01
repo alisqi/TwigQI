@@ -1,0 +1,9 @@
+name: "twig-stan"
+services:
+  my-service:
+    api: 3
+    type: php:8.1
+    via: cli
+    composer_version: "2-latest"
+    build:
+      - composer install

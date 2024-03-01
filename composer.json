@@ -1,0 +1,20 @@
+{
+    "name": "alisqi/twig-stan",
+    "description": "Static code analysis for Twig templates",
+    "type": "library",
+    "require": {
+        "php": "^8.0",
+        "twig/twig": "^3.8"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Alisqi\\TwigStan\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Jeroen Versteeg"
+        }
+    ]
+}
