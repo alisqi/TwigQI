@@ -1,9 +1,15 @@
 name: "twig-stan"
 services:
-  my-service:
+  php:
     api: 3
     type: php:8.1
     via: cli
+    xdebug: true
     composer_version: "2-latest"
     build:
       - composer install
+    overrides:
+        environment:
+            PHP_IDE_CONFIG: "serverName=twigstan"
+            XDEBUG_CONFIG: "client_host=host.docker.internal" # https://github.com/lando/lando/issues/2271
+            XDEBUG_SESSION: 1 # always enable xdebug

@@ -32,7 +32,7 @@ class UndeclaredVariableInMacro extends AbstractNodeVisitor
             foreach ($node->getNode('names') as $nameNode) {
                 $this->declaredVariableNames[] = $nameNode->getAttribute('name');
             }
-        }  else if ($node instanceof ForNode) {
+        } else if ($node instanceof ForNode) {
             // when entering a `for` tag, add its declared variables and 'loop' to declared variables
             $this->declaredVariableNames += $this->getForNodeVariables($node);
         } else if (
