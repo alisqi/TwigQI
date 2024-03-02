@@ -9,12 +9,20 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Alisqi\\TwigStan\\": "src/"
+            "AlisQI\\TwigStan\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AlisQI\\TwigStan\\Tests\\": "tests/"
         }
     },
     "authors": [
         {
             "name": "Jeroen Versteeg"
         }
-    ]
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "^10.5"
+    }
 }
