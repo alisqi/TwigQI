@@ -28,7 +28,7 @@ class UndeclaredVariableInMacroTest extends TestCase
         restore_error_handler();
     }
     
-    public function test_itDetectsUndeclaredVariables()
+    public function test_itDetectsNakedVariables()
     {
         $this->env->createTemplate(<<<EOF
             {% macro marco() %}
@@ -43,6 +43,51 @@ class UndeclaredVariableInMacroTest extends TestCase
         
         self::assertStringContainsString('bar', $this->errors[1]);
         self::assertStringContainsString('marco', $this->errors[1]);
+    }
+
+    public function test_itDetectsAdvancedVariableUsages(): void
+    {
+        // filter input
+        $this->env->createTemplate(<<<EOF
+            {% macro marco() %}
+                {{ foo|abs }}
+            {% endmacro %}
+        EOF)->render();
+        
+        self::assertCount(1, $this->errors);
+        
+        $this->errors = [];
+        
+        // function argument
+        $this->env->createTemplate(<<<EOF
+            {% macro marco() %}
+                {{ max(foo) }}
+            {% endmacro %}
+        EOF)->render();
+        
+        self::assertCount(1, $this->errors);
+        
+        $this->errors = [];
+
+        // string interpolation
+        $this->env->createTemplate(<<<EOF
+            {% macro marco() %}
+                {{ "#{foo}" }}
+            {% endmacro %}
+        EOF)->render();
+        
+        self::assertCount(1, $this->errors);
+        
+        $this->errors = [];
+        
+        // object keys
+        $this->env->createTemplate(<<<EOF
+            {% macro marco() %}
+                {{ {(foo): true} }}
+            {% endmacro %}
+        EOF)->render();
+        
+        self::assertCount(1, $this->errors);
     }
 
     public function test_itIgnoresNonMacroCode()
