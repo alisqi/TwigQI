@@ -4,6 +4,7 @@ namespace AlisQI\TwigStan\Inspection;
 
 use Twig\Environment;
 use Twig\Node\Expression\NameExpression;
+use Twig\Node\ForNode;
 use Twig\Node\MacroNode;
 use Twig\Node\Node;
 use Twig\Node\SetNode;
@@ -11,7 +12,6 @@ use Twig\NodeVisitor\AbstractNodeVisitor;
 
 class UndeclaredVariableInMacro extends AbstractNodeVisitor
 {
-
     private ?string $currentMacro = null;
 
     /** @var string[] */
@@ -43,7 +43,7 @@ class UndeclaredVariableInMacro extends AbstractNodeVisitor
             // when visiting a (variable) name expression, test whether it's already declared
             $this->checkVariableIsDeclared($node->getAttribute('name'));
         }
-		
+
         return $node;
     }
 
