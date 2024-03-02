@@ -32,15 +32,27 @@ class UndeclaredVariableInMacroTest extends TestCase
     {
         $this->env->createTemplate(<<<EOF
             {% macro marco() %}
-                {{ foo }}
+                {{ [foo, bar] }}
             {% endmacro %}
         EOF)->render();
         
-        self::assertCount(1, $this->errors);
+        self::assertCount(2, $this->errors);
         
-        $error = current($this->errors);
-        self::assertStringContainsString('foo', $error);
-        self::assertStringContainsString('marco', $error);
+        self::assertStringContainsString('foo', $this->errors[0]);
+        self::assertStringContainsString('marco', $this->errors[0]);
+        
+        self::assertStringContainsString('bar', $this->errors[1]);
+        self::assertStringContainsString('marco', $this->errors[1]);
+    }
+
+    public function test_itIgnoresNonMacroCode()
+    {
+        $this->env->createTemplate(<<<EOF
+            {% macro marco() %}{% endmacro %}
+            {{ whoopiedoo }}
+        EOF)->render();
+        
+        self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
 
     public function test_itRecognizesMacroArguments(): void
@@ -113,12 +125,24 @@ class UndeclaredVariableInMacroTest extends TestCase
         $this->env->createTemplate(<<<EOF
             {% macro marco() %}
                 {% for key, value in {} %}
-                    {{ loop.index }}: {{ key }} = {{ value }}
+                    {{ [loop, key, value] }}
                 {% endfor %}
             {% endmacro %}
         EOF)->render();
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
+        
+        $this->errors = [];
+        
+        // assert that loop variables are unset after the loop
+        $this->env->createTemplate(<<<EOF
+            {% macro marco() %}
+                {% for key, value in {} %}{% endfor %}
+                {{ [loop, key, value] }}
+            {% endmacro %}
+        EOF)->render();
+        
+        self::assertCount(3, $this->errors);
     }
     
     public function test_itDetectsArrowFunctionVariables(): void
@@ -130,5 +154,17 @@ class UndeclaredVariableInMacroTest extends TestCase
         EOF)->render();
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
+        
+        $this->errors = [];
+        
+        // assert that arrow function variables are unset after the function expression
+        $this->env->createTemplate(<<<EOF
+            {% macro marco() %}
+                {{ []|filter((key, value) => key and value) }}
+                {{ [key, value] }}
+            {% endmacro %}
+        EOF)->render();
+        
+        self::assertCount(2, $this->errors);
     }
 }

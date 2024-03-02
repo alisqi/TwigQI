@@ -21,30 +21,20 @@ class UndeclaredVariableInMacro extends AbstractNodeVisitor
     protected function doEnterNode(Node $node, Environment $env): Node
     {
         if ($node instanceof MacroNode) {
-            // when entering a macro, add its arguments to declared variables
             $this->currentMacro = $node->getAttribute('name');
-            $this->declaredVariableNames = [];
-
-            foreach ($node->getNode('arguments') as $name => $default) {
-                $this->declaredVariableNames[] = $name;
-            }
-        } else if ($node instanceof SetNode) {
-            // when entering a `set` tag, add its variables to declared variables
-            foreach ($node->getNode('names') as $nameNode) {
-                $this->declaredVariableNames[] = $nameNode->getAttribute('name');
-            }
-        } else if ($node instanceof ForNode) {
-            // when entering a `for` tag, add its declared variables and 'loop' to declared variables
-            $this->declaredVariableNames += $this->getForNodeVariables($node);
-        } else if ($node instanceof ArrowFunctionExpression) {
-            // when entering a `for` tag, add its declared variables and 'loop' to declared variables
-            $this->declaredVariableNames += $this->getArrowFunctionVariables($node);
-        } else if (
+            $this->declaredVariableNames = []; // reset declared variables (macro arguments will be added below)
+        }
+        
+        $this->declaredVariableNames = array_merge(
+            $this->declaredVariableNames,
+            $this->getDeclaredVariablesFor($node)
+        );
+        
+        if (
             $this->currentMacro &&
             $node instanceof NameExpression &&
             $node->isSimple()
         ) {
-            // when visiting a (variable) name expression, test whether it's already declared
             $this->checkVariableIsDeclared($node->getAttribute('name'));
         }
 
@@ -53,21 +43,19 @@ class UndeclaredVariableInMacro extends AbstractNodeVisitor
 
     protected function doLeaveNode(Node $node, Environment $env): Node
     {
-        $variablesToUnset = [];
-        
         if ($node instanceof MacroNode) {
             $this->currentMacro = null;
             // no need to unset any variables, as that will happen in doEnterNode
-        } elseif ($node instanceof ForNode) {
-            $variablesToUnset = $this->getForNodeVariables($node);
-        } elseif ($node instanceof ArrowFunctionExpression) {
-            $variablesToUnset = $this->getArrowFunctionVariables($node);
+            return $node;
         }
-        
-        $this->declaredVariableNames = array_filter(
-            $this->declaredVariableNames,
-            static fn($variable) => !in_array($variable, $variablesToUnset, true)
-        );
+
+        if (!($node instanceof SetNode)) { // variables declared in {% set %} are never unset
+            $variablesToUnset = $this->getDeclaredVariablesFor($node);
+            $this->declaredVariableNames = array_filter(
+                $this->declaredVariableNames,
+                static fn($variable) => !in_array($variable, $variablesToUnset, true)
+            );
+        }
 
         return $node;
     }
@@ -75,43 +63,45 @@ class UndeclaredVariableInMacro extends AbstractNodeVisitor
     /**
      * @return string[]
      */
-    private function getForNodeVariables(ForNode $node): array
-    {
-        $variables = [
-            'loop',
-            $valueVariable = $node->getNode('value_target')->getAttribute('name'),
-        ];
-        if ($valueVariable !== ($keyVariable = $node->getNode('key_target')->getAttribute('name'))) {
-            $variables[] = $keyVariable;
-        }
-        return $variables;
-    }
-
-    /**
-     * @return string[]
-     */
-    private function getArrowFunctionVariables(ArrowFunctionExpression $node): array
+    private function getDeclaredVariablesFor(Node $node): array
     {
         $variables = [];
-        foreach ($node->getNode('names') as $nameNode) {
-            $variables[] = $nameNode->getAttribute('name');
+        
+        // Strategy pattern would be overkill here (for now, at least)
+        if ($node instanceof MacroNode) {
+            foreach ($node->getNode('arguments') as $name => $default) {
+                $variables[] = $name;
+            }
+        } else if (
+            $node instanceof SetNode ||
+            $node instanceof ArrowFunctionExpression
+        ) {
+            foreach ($node->getNode('names') as $nameNode) {
+                $variables[] = $nameNode->getAttribute('name');
+            }
+        } else if ($node instanceof ForNode) {
+            $variables += [
+                'loop',
+                $valueVariable = $node->getNode('value_target')->getAttribute('name'),
+            ];
+            
+            // add key variable if it's declared (the node always exists)
+            if ($valueVariable !== ($keyVariable = $node->getNode('key_target')->getAttribute('name'))) {
+                $variables[] = $keyVariable;
+            }
         }
         
         return $variables;
     }
-
+    
     private function checkVariableIsDeclared(string $variableName): void
     {
         if (!in_array($variableName, $this->declaredVariableNames, false)) {
-            $error = sprintf(
+            trigger_error(sprintf(
                 'The macro "%s" uses an undeclared variable named "%s".',
                 $this->currentMacro,
                 $variableName
-            );
-
-            $this->currentMacro = null;
-
-            trigger_error($error, E_USER_WARNING); // some environments might throw Exceptions in their error handlers, so we should assume this line throws itself
+            ), E_USER_WARNING);
         }
     }
 
