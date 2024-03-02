@@ -22,7 +22,7 @@ class UndeclaredVariableInMacro extends AbstractNodeVisitor
         if ($node instanceof MacroNode) {
             // when entering a macro, add its arguments to declared variables
             $this->currentMacro = $node->getAttribute('name');
-            $this->declaredVariableNames = array_keys($env->getGlobals());
+            $this->declaredVariableNames = [];
 
             foreach ($node->getNode('arguments') as $name => $default) {
                 $this->declaredVariableNames[] = $name;
