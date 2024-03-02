@@ -3,6 +3,7 @@
 namespace AlisQI\TwigStan\Inspection;
 
 use Twig\Environment;
+use Twig\Node\Expression\ArrowFunctionExpression;
 use Twig\Node\Expression\NameExpression;
 use Twig\Node\ForNode;
 use Twig\Node\MacroNode;
@@ -35,6 +36,9 @@ class UndeclaredVariableInMacro extends AbstractNodeVisitor
         } else if ($node instanceof ForNode) {
             // when entering a `for` tag, add its declared variables and 'loop' to declared variables
             $this->declaredVariableNames += $this->getForNodeVariables($node);
+        } else if ($node instanceof ArrowFunctionExpression) {
+            // when entering a `for` tag, add its declared variables and 'loop' to declared variables
+            $this->declaredVariableNames += $this->getArrowFunctionVariables($node);
         } else if (
             $this->currentMacro &&
             $node instanceof NameExpression &&
@@ -49,18 +53,21 @@ class UndeclaredVariableInMacro extends AbstractNodeVisitor
 
     protected function doLeaveNode(Node $node, Environment $env): Node
     {
+        $variablesToUnset = [];
+        
         if ($node instanceof MacroNode) {
             $this->currentMacro = null;
-            // no need to reset $this->declaredVariableNames
+            // no need to unset any variables, as that will happen in doEnterNode
         } elseif ($node instanceof ForNode) {
-            // remove 'loop' variable
-            $forVariables = $this->getForNodeVariables($node);
-            
-            $this->declaredVariableNames = array_filter(
-                $this->declaredVariableNames,
-                static fn($variable) => !in_array($variable, $forVariables)
-            );
+            $variablesToUnset = $this->getForNodeVariables($node);
+        } elseif ($node instanceof ArrowFunctionExpression) {
+            $variablesToUnset = $this->getArrowFunctionVariables($node);
         }
+        
+        $this->declaredVariableNames = array_filter(
+            $this->declaredVariableNames,
+            static fn($variable) => !in_array($variable, $variablesToUnset, true)
+        );
 
         return $node;
     }
@@ -77,6 +84,19 @@ class UndeclaredVariableInMacro extends AbstractNodeVisitor
         if ($valueVariable !== ($keyVariable = $node->getNode('key_target')->getAttribute('name'))) {
             $variables[] = $keyVariable;
         }
+        return $variables;
+    }
+
+    /**
+     * @return string[]
+     */
+    private function getArrowFunctionVariables(ArrowFunctionExpression $node): array
+    {
+        $variables = [];
+        foreach ($node->getNode('names') as $nameNode) {
+            $variables[] = $nameNode->getAttribute('name');
+        }
+        
         return $variables;
     }
 

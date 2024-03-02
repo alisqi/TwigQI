@@ -120,4 +120,15 @@ class UndeclaredVariableInMacroTest extends TestCase
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
+    
+    public function test_itDetectsArrowFunctionVariables(): void
+    {
+        $this->env->createTemplate(<<<EOF
+            {% macro marco() %}
+                {{ []|filter((key, value) => key and value) }}
+            {% endmacro %}
+        EOF)->render();
+        
+        self::assertEmpty($this->errors, implode(', ', $this->errors));
+    }
 }
