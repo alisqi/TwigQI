@@ -112,8 +112,8 @@ class UndeclaredVariableInMacroTest extends TestCase
     {
         $this->env->createTemplate(<<<EOF
             {% macro marco() %}
-                {% for i in [] %}
-                    {{ loop.index }}: {{ i }}
+                {% for key, value in {} %}
+                    {{ loop.index }}: {{ key }} = {{ value }}
                 {% endfor %}
             {% endmacro %}
         EOF)->render();

@@ -32,6 +32,9 @@ class UndeclaredVariableInMacro extends AbstractNodeVisitor
             foreach ($node->getNode('names') as $nameNode) {
                 $this->declaredVariableNames[] = $nameNode->getAttribute('name');
             }
+        }  else if ($node instanceof ForNode) {
+            // when entering a `for` tag, add its declared variables and 'loop' to declared variables
+            $this->declaredVariableNames += $this->getForNodeVariables($node);
         } else if (
             $this->currentMacro &&
             $node instanceof NameExpression &&
@@ -49,17 +52,36 @@ class UndeclaredVariableInMacro extends AbstractNodeVisitor
         if ($node instanceof MacroNode) {
             $this->currentMacro = null;
             // no need to reset $this->declaredVariableNames
+        } elseif ($node instanceof ForNode) {
+            // remove 'loop' variable
+            $forVariables = $this->getForNodeVariables($node);
+            
+            $this->declaredVariableNames = array_filter(
+                $this->declaredVariableNames,
+                static fn($variable) => !in_array($variable, $forVariables)
+            );
         }
 
         return $node;
     }
 
+    /**
+     * @return string[]
+     */
+    private function getForNodeVariables(ForNode $node): array
+    {
+        $variables = [
+            'loop',
+            $valueVariable = $node->getNode('value_target')->getAttribute('name'),
+        ];
+        if ($valueVariable !== ($keyVariable = $node->getNode('key_target')->getAttribute('name'))) {
+            $variables[] = $keyVariable;
+        }
+        return $variables;
+    }
+
     private function checkVariableIsDeclared(string $variableName): void
     {
-        if (str_starts_with($variableName, '_')) {
-            return;
-        }
-
         if (!in_array($variableName, $this->declaredVariableNames, false)) {
             $error = sprintf(
                 'The macro "%s" uses an undeclared variable named "%s".',
