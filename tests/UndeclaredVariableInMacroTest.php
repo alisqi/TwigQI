@@ -125,7 +125,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
     
-    public function test_itDetectsGlobalVariables(): void
+    public function test_itReportsGlobalVariables(): void
     {
         $this->env->addGlobal('gloobar', true);
         
@@ -139,6 +139,18 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
             'gloobar',
             current($this->errors) ?: '(no error)',
         );
+    }
+    
+    public function test_itSupportsVarArgs(): void
+    {
+        $this->env->createTemplate(<<<EOF
+            {% macro marco() %}
+                {{ varargs|length }}
+            {% endmacro %}
+            {{ _self.marco(13, 37) }}
+        EOF)->render();
+        
+        self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
     
     public function test_itDetectsForLoopVariables(): void

@@ -13,6 +13,10 @@ use Twig\NodeVisitor\AbstractNodeVisitor;
 
 class UndeclaredVariableInMacro extends AbstractNodeVisitor
 {
+    private const SPECIAL_VARIABLE_NAMES = [
+        'varargs',
+    ];
+    
     private ?string $currentMacro = null;
 
     /** @var string[] */
@@ -96,7 +100,10 @@ class UndeclaredVariableInMacro extends AbstractNodeVisitor
     
     private function checkVariableIsDeclared(string $variableName): void
     {
-        if (!in_array($variableName, $this->declaredVariableNames, false)) {
+        if (
+            !in_array($variableName, $this->declaredVariableNames, false) &&
+            !in_array($variableName, self::SPECIAL_VARIABLE_NAMES, false)
+        ) {
             trigger_error(sprintf(
                 'The macro "%s" uses an undeclared variable named "%s".',
                 $this->currentMacro,
