@@ -18,5 +18,5 @@ tooling:
   test:
     service: php
     description: Run tests
-    dir: /app/tests
-    cmd: /app/vendor/bin/phpunit *
+    dir: /app
+    cmd: /app/vendor/bin/phpunit
