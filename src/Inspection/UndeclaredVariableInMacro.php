@@ -19,7 +19,13 @@ class UndeclaredVariableInMacro extends AbstractNodeVisitor
     
     private ?string $currentMacro = null;
 
-    /** @var string[] */
+    /**
+     * A stack of variable names.
+     * This can contain duplicates due to for loops or arrow functions
+     * redeclaring variables.
+     * 
+     * @var string[]
+     */
     private array $declaredVariableNames = [];
 
     protected function doEnterNode(Node $node, Environment $env): Node
@@ -53,12 +59,13 @@ class UndeclaredVariableInMacro extends AbstractNodeVisitor
             return $node;
         }
 
-        if (!($node instanceof SetNode)) { // variables declared in {% set %} are never unset
-            $variablesToUnset = $this->getDeclaredVariablesFor($node);
-            $this->declaredVariableNames = array_filter(
-                $this->declaredVariableNames,
-                static fn($variable) => !in_array($variable, $variablesToUnset, true)
-            );
+        if (
+            $node instanceof ForNode ||
+            $node instanceof ArrowFunctionExpression
+        ) {
+            if (!empty($variablesToUnset = $this->getDeclaredVariablesFor($node))) {
+                array_splice($this->declaredVariableNames, -count($variablesToUnset));
+            }
         }
 
         return $node;
@@ -86,13 +93,9 @@ class UndeclaredVariableInMacro extends AbstractNodeVisitor
         } else if ($node instanceof ForNode) {
             $variables += [
                 'loop',
-                $valueVariable = $node->getNode('value_target')->getAttribute('name'),
+                $node->getNode('key_target')->getAttribute('name'), // if loop doesn't declare key variable, _key is added automatically
+                $node->getNode('value_target')->getAttribute('name'),
             ];
-            
-            // add key variable if it's declared (the node always exists)
-            if ($valueVariable !== ($keyVariable = $node->getNode('key_target')->getAttribute('name'))) {
-                $variables[] = $keyVariable;
-            }
         }
         
         return $variables;

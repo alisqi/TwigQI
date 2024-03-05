@@ -167,6 +167,19 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
         
         $this->errors = [];
         
+        // assert that _key is allowed inside for loop if key isn't declared
+        $this->env->createTemplate(<<<EOF
+            {% macro marco() %}
+                {% for value in {} %}
+                    {{ [loop, _key, value] }}
+                {% endfor %}
+            {% endmacro %}
+        EOF)->render();
+        
+        self::assertEmpty($this->errors, implode(', ', $this->errors));
+        
+        $this->errors = [];
+        
         // assert that loop variables are unset after the loop
         $this->env->createTemplate(<<<EOF
             {% macro marco() %}
@@ -176,6 +189,30 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
         EOF)->render();
         
         self::assertCount(3, $this->errors);
+        
+        $this->errors = [];
+        
+        // same for _key
+        $this->env->createTemplate(<<<EOF
+            {% macro marco() %}
+                {% for value in {} %}{% endfor %}
+                {{ [_key] }}
+            {% endmacro %}
+        EOF)->render();
+        
+        self::assertCount(1, $this->errors);
+        
+        $this->errors = [];
+        
+        // assert that we can redeclare variables in for loop (even if it might not be advisable)
+        $this->env->createTemplate(<<<EOF
+            {% macro marco(polo) %}
+                {% for polo in [] %}{% endfor %}
+                {{ polo }}
+            {% endmacro %}
+        EOF)->render();
+        
+        self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
     
     public function test_itDetectsArrowFunctionVariables(): void
@@ -199,5 +236,17 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
         EOF)->render();
         
         self::assertCount(2, $this->errors);
+        
+        $this->errors = [];
+        
+        // assert that arrow function variables can use already-declared variable
+        $this->env->createTemplate(<<<EOF
+            {% macro marco(polo) %}
+                {{ []|filter(polo => polo) }}
+                {{ [polo] }}
+            {% endmacro %}
+        EOF)->render();
+        
+        self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
 }
