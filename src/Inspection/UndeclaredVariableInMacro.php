@@ -42,10 +42,9 @@ class UndeclaredVariableInMacro extends AbstractNodeVisitor
         
         if (
             $this->currentMacro &&
-            $node instanceof NameExpression &&
-            $node->isSimple()
+            $node instanceof NameExpression
         ) {
-            $this->checkVariableIsDeclared($node->getAttribute('name'));
+            $this->checkVariableIsDeclared($node);
         }
 
         return $node;
@@ -100,18 +99,26 @@ class UndeclaredVariableInMacro extends AbstractNodeVisitor
         
         return $variables;
     }
-    
-    private function checkVariableIsDeclared(string $variableName): void
+
+    private function checkVariableIsDeclared(NameExpression $node): void
     {
+        $variableName = $node->getAttribute('name');
+
         if (
+            $node->isSimple() &&
             !in_array($variableName, $this->declaredVariableNames, false) &&
             !in_array($variableName, self::SPECIAL_VARIABLE_NAMES, false)
         ) {
-            trigger_error(sprintf(
-                'The macro "%s" uses an undeclared variable named "%s".',
-                $this->currentMacro,
-                $variableName
-            ), E_USER_WARNING);
+            trigger_error(
+                sprintf(
+                    'The macro "%s" (%s:%d) uses an undeclared variable named "%s".',
+                    $this->currentMacro,
+                    $node->getSourceContext()?->getPath() ?? '',
+                    $node->getTemplateLine(),
+                    $variableName,
+                ),
+                E_USER_WARNING
+            );
         }
     }
 
