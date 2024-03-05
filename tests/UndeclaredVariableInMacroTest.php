@@ -135,10 +135,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
             {% endmacro %}
         EOF)->render();
         
-        self::assertStringContainsString(
-            'gloobar',
-            current($this->errors) ?: '(no error)',
-        );
+        self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
     
     public function test_itSupportsVarArgs(): void

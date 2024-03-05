@@ -32,7 +32,7 @@ class UndeclaredVariableInMacro extends AbstractNodeVisitor
     {
         if ($node instanceof MacroNode) {
             $this->currentMacro = $node->getAttribute('name');
-            $this->declaredVariableNames = []; // reset declared variables (macro arguments will be added below)
+            $this->declaredVariableNames = array_keys($env->getGlobals()); // reset declared variables (macro arguments will be added below)
         }
         
         $this->declaredVariableNames = array_merge(
@@ -106,6 +106,7 @@ class UndeclaredVariableInMacro extends AbstractNodeVisitor
 
         if (
             $node->isSimple() &&
+            !str_starts_with($variableName, '__internal') &&
             !in_array($variableName, $this->declaredVariableNames, false) &&
             !in_array($variableName, self::SPECIAL_VARIABLE_NAMES, false)
         ) {
