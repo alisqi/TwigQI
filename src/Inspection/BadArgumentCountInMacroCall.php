@@ -66,11 +66,16 @@ class BadArgumentCountInMacroCall extends AbstractNodeVisitor
                     fn($default) => $default !== $this->noDefaultValueSymbol
                 );
                 
-                if ($argumentCount !== count($requiredArguments)) {
-                    trigger_error(sprintf(
-                        "Too %s arguments ($argumentCount) for macro '$macroName'",
-                        $argumentCount < count($requiredArguments) ? 'few' : 'many'
-                    ), E_USER_WARNING);
+                if ($argumentCount < count($requiredArguments)) {
+                    trigger_error(
+                        "Too few arguments ($argumentCount) for macro '$macroName'",
+                        E_USER_WARNING
+                    );
+                } elseif ($argumentCount > count($signature)) {
+                    trigger_error(
+                        "Too many arguments ($argumentCount) for macro '$macroName'",
+                        E_USER_WARNING
+                    );
                 }
             }
         }
