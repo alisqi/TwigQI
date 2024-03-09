@@ -150,6 +150,17 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
     
+    public function test_itSupportsIsDefined(): void
+    {
+        $this->env->createTemplate(<<<EOF
+            {% macro marco() %}
+                {{ polo is defined }}
+            {% endmacro %}
+        EOF)->render();
+        
+        self::assertEmpty($this->errors, implode(', ', $this->errors));
+    }
+    
     public function test_itDetectsForLoopVariables(): void
     {
         $this->env->createTemplate(<<<EOF
