@@ -4,13 +4,15 @@ namespace AlisQI\TwigStan\Inspection;
 
 use Twig\Environment;
 use Twig\Node\Expression\MethodCallExpression;
-use Twig\Node\MacroNode;
+use Twig\Node\Expression\NameExpression;
 use Twig\Node\ModuleNode;
 use Twig\Node\Node;
 use Twig\NodeVisitor\AbstractNodeVisitor;
 
 class BadArgumentCountInMacroCall extends AbstractNodeVisitor
 {
+    private const VAR_ARGS = 'varargs';
+    
     private self $noDefaultValueSymbol;
     
     /**
@@ -51,6 +53,11 @@ class BadArgumentCountInMacroCall extends AbstractNodeVisitor
                     $signature[$name] = $default->getAttribute('value') ?? $this->noDefaultValueSymbol;
                 }
                 
+                // add 'varargs' to signature if it's used anywhere (i.e., there's a NameExpression that uses it)
+                if ($this->hasVarArgsNameExpressionDescendant($macroNode)) {
+                    $signature[self::VAR_ARGS] = null;
+                }
+                
                 $this->macroSignatures[$macroName] = $signature;
             }
         } elseif ($node instanceof MethodCallExpression) {
@@ -71,7 +78,10 @@ class BadArgumentCountInMacroCall extends AbstractNodeVisitor
                         "Too few arguments ($argumentCount) for macro '$macroName'",
                         E_USER_WARNING
                     );
-                } elseif ($argumentCount > count($signature)) {
+                } elseif (
+                    !array_key_exists(self::VAR_ARGS, $signature) &&
+                    $argumentCount > count($signature)
+                ) {
                     trigger_error(
                         "Too many arguments ($argumentCount) for macro '$macroName'",
                         E_USER_WARNING
@@ -91,5 +101,22 @@ class BadArgumentCountInMacroCall extends AbstractNodeVisitor
     public function getPriority(): int
     {
         return 0;
+    }
+
+    private function hasVarArgsNameExpressionDescendant(Node $node): bool {
+        if (
+            $node instanceof NameExpression &&
+            $node->getAttribute('name') === self::VAR_ARGS
+        ) {
+            return true;
+        }
+    
+        foreach ($node as $childNode) {
+            if ($this->hasVarArgsNameExpressionDescendant($childNode)) {
+                return true;
+            }
+        }
+    
+        return false;
     }
 }

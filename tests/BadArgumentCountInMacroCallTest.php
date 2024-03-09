@@ -35,6 +35,17 @@ class BadArgumentCountInMacroCallTest extends AbstractTestCase
             {% macro marco() %}
                 {{ varargs|length }}
             {% endmacro %}
+            {{ _self.marco(1337) }}
+        EOF)->render();
+        
+        self::assertEmpty($this->errors, implode(', ', $this->errors));
+        
+        $this->env->createTemplate(<<<EOF
+            {% macro marco(polo) %}
+                {% if polo %}
+                    {{ varargs|length }}
+                {% endif %}
+            {% endmacro %}
             {{ _self.marco(13, 37) }}
         EOF)->render();
         
@@ -65,6 +76,4 @@ class BadArgumentCountInMacroCallTest extends AbstractTestCase
     }
     
     // TODO: Add test for imported macros (including aliases)
-    
-    // TODO: Add test for varargs
 }
