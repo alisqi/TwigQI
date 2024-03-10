@@ -105,9 +105,11 @@ class BadArgumentCountInMacroCallTest extends AbstractTestCase
         
         self::assertCount(2, $this->errors);
         
+        self::assertStringContainsString('importedMacro', $this->errors[0]);
         self::assertStringContainsString('local', $this->errors[0]);
         self::assertStringContainsStringIgnoringCase('too many', $this->errors[0]);
         
+        self::assertStringContainsString('importedMacro', $this->errors[1]);
         self::assertStringContainsString('marco', $this->errors[1]);
         self::assertStringContainsStringIgnoringCase('too many', $this->errors[1]);
     }

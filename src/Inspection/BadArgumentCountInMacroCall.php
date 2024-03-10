@@ -51,7 +51,11 @@ class BadArgumentCountInMacroCall extends AbstractNodeVisitor
         } elseif ($node instanceof MethodCallExpression) {
             // when visiting a function call, log call
             $macroName = substr($node->getAttribute('method'), strlen('macro_'));
-            $location = ($node->getSourceContext()?->getPath() ?? 'local') . ':' . $node->getTemplateLine();
+            
+            $sourcePath = ($node->getSourceContext() ?? $node->getNode('node')->getSourceContext())?->getPath()
+                ?? 'unknown';
+            $location = "$sourcePath:{$node->getTemplateLine()}";
+            
             $argumentCount = count($node->getNode('arguments')->getKeyValuePairs());
 
             $this->macroCalls[$macroName][] = [$argumentCount, $location];
