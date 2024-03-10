@@ -23,7 +23,7 @@ class BadArgumentCountInMacroCall extends AbstractNodeVisitor
      * ['tpl.twig:marco' => ['arg1' => $this, 'arg2' => false]];
      * ```
      * 
-     * @var array<string, array<string, mixed>>
+     * @var array<string, string[]>
      */
     private array $macroSignatures = [];
 
@@ -38,12 +38,12 @@ class BadArgumentCountInMacroCall extends AbstractNodeVisitor
                 $macroName = $macroNode->getAttribute('name');
                 $signature = [];
                 foreach ($macroNode->getNode('arguments') as $name => $default) {
-                    $signature[$name] = $default->getAttribute('value');
+                    $signature[] = $name;
                 }
                 
                 // add 'varargs' to signature if it's used anywhere (i.e., there's a NameExpression that uses it)
                 if ($this->hasVarArgsNameExpressionDescendant($macroNode)) {
-                    $signature[self::VAR_ARGS] = null;
+                    $signature[] = self::VAR_ARGS;
                 }
                 
                 $this->macroSignatures[$macroName] = $signature;
@@ -55,7 +55,7 @@ class BadArgumentCountInMacroCall extends AbstractNodeVisitor
                 $argumentCount = count($node->getNode('arguments')->getKeyValuePairs());
                 
                 if (
-                    !array_key_exists(self::VAR_ARGS, $signature) &&
+                    !in_array(self::VAR_ARGS, $signature, true) &&
                     $argumentCount > count($signature)
                 ) {
                     trigger_error(

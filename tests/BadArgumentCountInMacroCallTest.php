@@ -52,6 +52,18 @@ class BadArgumentCountInMacroCallTest extends AbstractTestCase
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
     
+    public function test_itSupportsArrayDefaults(): void
+    {
+        $this->env->createTemplate(<<<EOF
+            {% macro marco(polo = []) %}
+                {{ polo|length }}
+            {% endmacro %}
+            {{ _self.marco() }}
+        EOF)->render();
+        
+        self::assertEmpty($this->errors, implode(', ', $this->errors));
+    }
+    
     public function test_itWarnsForTooFewArguments(): void
     {
         self::markTestIncomplete('Cannot implement this feature. See README');
