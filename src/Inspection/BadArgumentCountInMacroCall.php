@@ -5,7 +5,7 @@ namespace AlisQI\TwigStan\Inspection;
 use Twig\Environment;
 use Twig\Node\Expression\MethodCallExpression;
 use Twig\Node\Expression\NameExpression;
-use Twig\Node\ModuleNode;
+use Twig\Node\MacroNode;
 use Twig\Node\Node;
 use Twig\NodeVisitor\AbstractNodeVisitor;
 
@@ -14,59 +14,65 @@ class BadArgumentCountInMacroCall extends AbstractNodeVisitor
     private const VAR_ARGS = 'varargs';
 
     /**
-     * The top-level array has the macro's identifier as keys and their signature as value
-     * The signature has argument names as keys and default value () as value.
-     * We use $this to denote the absence of a default value since `null` can be a default. 
+     * The top-level array has the macro's name as keys and its calls as value.
+     * Each call is represented as an array containing the number of arguments
+     * and the source location of the call.
      * 
      * For example:
      * ```php
-     * ['tpl.twig:marco' => ['arg1' => $this, 'arg2' => false]];
+     * ['marco' => [[1, 'tpl:1337']]];
      * ```
      * 
-     * @var array<string, string[]>
+     * @var array<string, array<array{0: int, 1: string}>>
      */
-    private array $macroSignatures = [];
+    private array $macroCalls = [];
 
     protected function doEnterNode(Node $node, Environment $env): Node
     {
         /*
-         * `MethodCallExpression`s are entered before `MacroNode`s.
-         * Therefore, we query `ModuleNode`s to create macro signatures.
+         * `MethodCallExpression`s are entered before `MacroNode`s, even if the call precedes the macro tag!
+         * Therefore, we log `MethodCallExpression`s and check them when entering the `MacroNode`s.
          */
-        if ($node instanceof ModuleNode) {
-            foreach ($node->getNode('macros') as $macroNode) {
-                $macroName = $macroNode->getAttribute('name');
-                $signature = [];
-                foreach ($macroNode->getNode('arguments') as $name => $default) {
-                    $signature[] = $name;
-                }
-                
-                // add 'varargs' to signature if it's used anywhere (i.e., there's a NameExpression that uses it)
-                if ($this->hasVarArgsNameExpressionDescendant($macroNode)) {
-                    $signature[] = self::VAR_ARGS;
-                }
-                
-                $this->macroSignatures[$macroName] = $signature;
+        if ($node instanceof MacroNode) {
+            // when visiting a macro declaration, check logged calls
+            $macroName = $node->getAttribute('name');
+
+            $signature = [];
+            foreach ($node->getNode('arguments') as $name => $default) {
+                $signature[] = $name;
             }
+
+            // add 'varargs' to signature if it's used anywhere (i.e., there's a NameExpression that uses it)
+            if ($this->hasVarArgsNameExpressionDescendant($node)) {
+                $signature[] = self::VAR_ARGS;
+            }
+
+            $this->checkCalls($macroName, $signature);
         } elseif ($node instanceof MethodCallExpression) {
-            // when visiting a function call, check argument count
+            // when visiting a function call, log call
             $macroName = substr($node->getAttribute('method'), strlen('macro_'));
-            if (null !== $signature = ($this->macroSignatures[$macroName] ?? null)) {
-                $argumentCount = count($node->getNode('arguments')->getKeyValuePairs());
-                
-                if (
-                    !in_array(self::VAR_ARGS, $signature, true) &&
-                    $argumentCount > count($signature)
-                ) {
-                    trigger_error(
-                        "Too many arguments ($argumentCount) for macro '$macroName'",
-                        E_USER_WARNING
-                    );
-                }
-            }
+            $location = ($node->getSourceContext()?->getPath() ?? 'local') . ':' . $node->getTemplateLine();
+            $argumentCount = count($node->getNode('arguments')->getKeyValuePairs());
+
+            $this->macroCalls[$macroName][] = [$argumentCount, $location];
         }
         
         return $node;
+    }
+
+    private function checkCalls(string $macro, array $signature): void
+    {
+        foreach (($this->macroCalls[$macro] ?? []) as [$argumentCount, $location]) {
+            if (
+                !in_array(self::VAR_ARGS, $signature, true) &&
+                $argumentCount > count($signature)
+            ) {
+                trigger_error(
+                    "Too many arguments ($argumentCount) for macro '$macro' (at $location)",
+                    E_USER_WARNING
+                );
+            }
+        }
     }
 
     protected function doLeaveNode(Node $node, Environment $env): Node

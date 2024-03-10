@@ -1,0 +1,7 @@
+{% from 'marco.twig' import marco %}
+
+{% macro local() %}
+{% endmacro %}
+
+{{ marco('po', 'lo') }} {# too many arguments #}
+{{ _self.local(true) }} {# idem dito #}

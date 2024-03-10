@@ -2,6 +2,8 @@
 
 namespace AlisQI\TwigStan\Tests;
 
+use Twig\Loader\FilesystemLoader;
+
 class BadArgumentCountInMacroCallTest extends AbstractTestCase
 {
     public function test_itDoesNotWarnForMatchingArgumentNumber(): void
@@ -92,6 +94,21 @@ class BadArgumentCountInMacroCallTest extends AbstractTestCase
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
-    
-    // TODO: Add test for imported macros (including aliases)
+
+    public function test_importedMacro(): void
+    {
+        $this->env->setLoader(
+            new FilesystemLoader(__DIR__ . '/fixtures')
+        );
+        
+        $this->env->render('importedMacro.twig');
+        
+        self::assertCount(2, $this->errors);
+        
+        self::assertStringContainsString('local', $this->errors[0]);
+        self::assertStringContainsStringIgnoringCase('too many', $this->errors[0]);
+        
+        self::assertStringContainsString('marco', $this->errors[1]);
+        self::assertStringContainsStringIgnoringCase('too many', $this->errors[1]);
+    }
 }
