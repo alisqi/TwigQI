@@ -55,5 +55,37 @@ configurability later.
 The reason the inspections use `trigger_error` instead of `Exception`s is that the latter would halt compilation,
 preventing the extension from reporting multiple issues in one go.
 
-The level of error (error, warning, notice) depends entirely on the authors' opinions on code quality. `E_USER_ERROR` is used for, well, errors, that the author(s) deem actual errors in code. For more opinionated issues
-(e.g., relying on macro arguments always being optional), `E_USER_WARNING` is used.
+The level of error (error, warning, notice) depends entirely on the authors' opinions on code quality. `E_USER_ERROR` is
+used for, well, errors, that the author(s) deem actual errors in code. For more opinionated issues (e.g., relying on
+macro arguments always being optional), `E_USER_WARNING` is used.
+
+## Challenges and limitations
+While implementing the first inspections, the authors ran into some limitations in the Twig extension design.
+
+One seemingly simple is that there's no way to distinguish whether a `macro` argument has an explicit `null` default or
+an implicit one. `ExpressionParser->parseArguments()` (line 628) will create identical ASTs for both.
+
+Another is that comments are not added to the AST at all (see `Lexer->lexComment()`), making it impossible to process
+type hints in `@var` comments.
+
+# Inspections
+Here's a list of inspections considered relevant.
+
+Those marked with ❌ are (considered) impossible to implement with the current design given the limitations.
+
+Most, if not all, of these inspections depend on the ability to inspect comments.
+
+## Variable types
+* ❌ Invalid type (e.g., `{# @var i nit #}`)
+* ❌ Invalid object property or method (e.g., `{{ user.nmae }}`)
+* ❌ Undocumented context variable (i.e., missing `{# @var foo bool #}`)
+* ❌ Use of short-hand form (e.g., `{{ user.admin }}` instead of `isAdmin`) [Notice]
+
+  Rationale: makes it hard to find usage of properties/methods
+* Non-stringable variable in string interpolation
+
+## Macros
+* ✅ Use of undeclared variables (arguments, `{% set %}`, etc)
+* ✅ Calls with *too many* arguments (except is `varargs` is used),
+* ❌ Calls with *too few* arguments
+* ❌ Type mismatch in macro call
