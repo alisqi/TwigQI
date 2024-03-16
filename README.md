@@ -66,14 +66,15 @@ One seemingly simple is that there's no way to distinguish whether a `macro` arg
 an implicit one. `ExpressionParser->parseArguments()` (line 628) will create identical ASTs for both.
 
 Another is that comments are not added to the AST at all (see `Lexer->lexComment()`), making it impossible to process
-type hints in `@var` comments.
+type hints in `@var` comments. Support for this has been added in
+[a Twig PR](https://github.com/twigphp/Twig/pull/4009). Let's 🤞 this gets merged!
 
 # Inspections
 Here's a list of inspections considered relevant.
 
 Those marked with ❌ are (considered) impossible to implement with the current design given the limitations.
 
-Most, if not all, of these inspections depend on the ability to inspect comments.
+Most, if not all, of these inspections depend on the ability to inspect comments, and can't be implemented *yet*.
 
 ## Variable types
 * ❌ Invalid type (e.g., `{# @var i nit #}`)
