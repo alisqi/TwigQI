@@ -7,9 +7,9 @@ use Twig\Node\Expression\MethodCallExpression;
 use Twig\Node\Expression\NameExpression;
 use Twig\Node\MacroNode;
 use Twig\Node\Node;
-use Twig\NodeVisitor\AbstractNodeVisitor;
+use Twig\NodeVisitor\NodeVisitorInterface;
 
-class BadArgumentCountInMacroCall extends AbstractNodeVisitor
+class BadArgumentCountInMacroCall implements NodeVisitorInterface
 {
     private const VAR_ARGS = 'varargs';
 
@@ -27,7 +27,7 @@ class BadArgumentCountInMacroCall extends AbstractNodeVisitor
      */
     private array $macroCalls = [];
 
-    protected function doEnterNode(Node $node, Environment $env): Node
+    public function enterNode(Node $node, Environment $env): Node
     {
         /*
          * `MethodCallExpression`s are entered before `MacroNode`s, even if the call precedes the macro tag!
@@ -79,7 +79,7 @@ class BadArgumentCountInMacroCall extends AbstractNodeVisitor
         }
     }
 
-    protected function doLeaveNode(Node $node, Environment $env): Node
+    public function leaveNode(Node $node, Environment $env): Node
     {
         return $node;
     }

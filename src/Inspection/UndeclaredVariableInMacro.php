@@ -9,9 +9,9 @@ use Twig\Node\ForNode;
 use Twig\Node\MacroNode;
 use Twig\Node\Node;
 use Twig\Node\SetNode;
-use Twig\NodeVisitor\AbstractNodeVisitor;
+use Twig\NodeVisitor\NodeVisitorInterface;
 
-class UndeclaredVariableInMacro extends AbstractNodeVisitor
+class UndeclaredVariableInMacro implements NodeVisitorInterface
 {
     private const SPECIAL_VARIABLE_NAMES = [
         'varargs',
@@ -28,7 +28,7 @@ class UndeclaredVariableInMacro extends AbstractNodeVisitor
      */
     private array $declaredVariableNames = [];
 
-    protected function doEnterNode(Node $node, Environment $env): Node
+    public function enterNode(Node $node, Environment $env): Node
     {
         if ($node instanceof MacroNode) {
             $this->currentMacro = $node->getAttribute('name');
@@ -50,7 +50,7 @@ class UndeclaredVariableInMacro extends AbstractNodeVisitor
         return $node;
     }
 
-    protected function doLeaveNode(Node $node, Environment $env): Node
+    public function leaveNode(Node $node, Environment $env): Node
     {
         if ($node instanceof MacroNode) {
             $this->currentMacro = null;
@@ -105,7 +105,7 @@ class UndeclaredVariableInMacro extends AbstractNodeVisitor
         $variableName = $node->getAttribute('name');
 
         if (
-            $node->isSimple() &&
+            !$node->getAttribute('is_defined_test') &&
             !str_starts_with($variableName, '__internal') &&
             !in_array($variableName, $this->declaredVariableNames, false) &&
             !in_array($variableName, self::SPECIAL_VARIABLE_NAMES, false)
