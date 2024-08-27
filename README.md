@@ -62,9 +62,9 @@ macro arguments always being optional), `E_USER_WARNING` is used.
 ## Challenges and limitations
 While implementing the first inspections, the authors ran into some limitations in the Twig extension design.
 
-One seemingly simple is that there's no way to distinguish whether a `macro` argument has an explicit `null` default or
-an implicit one. `ExpressionParser->parseArguments()` (line 628) will create identical ASTs for both. There's a
-[PR in review](https://github.com/twigphp/Twig/pull/4010) to add a distinction in the AST.
+One seemingly simple is that there was no way to distinguish whether a `macro` argument has an explicit `null`
+default or an implicit one. `ExpressionParser->parseArguments()` (line 628) created identical ASTs for both.
+[I've created a PR](https://github.com/twigphp/Twig/pull/4010) to add a distinction in the AST, which has been merged.
 
 Another is that there is no way to specify types. While the `@var` comments in the example are supported by the
 [Symfony Support plugin](https://plugins.jetbrains.com/plugin/7219-symfony-support) for PHPStorm, Twig's parser does not
