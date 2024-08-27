@@ -63,24 +63,30 @@ macro arguments always being optional), `E_USER_WARNING` is used.
 While implementing the first inspections, the authors ran into some limitations in the Twig extension design.
 
 One seemingly simple is that there's no way to distinguish whether a `macro` argument has an explicit `null` default or
-an implicit one. `ExpressionParser->parseArguments()` (line 628) will create identical ASTs for both.
+an implicit one. `ExpressionParser->parseArguments()` (line 628) will create identical ASTs for both. There's a
+[PR in review](https://github.com/twigphp/Twig/pull/4010) to add a distinction in the AST.
 
-Another is that comments are not added to the AST at all (see `Lexer->lexComment()`), making it impossible to process
-type hints in `@var` comments. Support for this has been added in
-[a Twig PR](https://github.com/twigphp/Twig/pull/4009). Let's 🤞 this gets merged!
+Another is that there is no way to specify types. While the `@var` comments in the example are supported by the
+[Symfony Support plugin](https://plugins.jetbrains.com/plugin/7219-symfony-support) for PHPStorm, Twig's parser does not
+add comments to the AST, meaning there's no way for extensions to process them. (A [PR to add support ](https://github.com/twigphp/Twig/pull/4009)
+was closed.)
+
+The good news is that it looks like Twig will support a [`types` tag](https://github.com/twigphp/Twig/issues/4165). 🤞
 
 # Inspections
 Here's a list of inspections considered relevant.
 
-Those marked with ❌ are (considered) impossible to implement with the current design given the limitations.
+Those marked with ⌛ are (considered) possible to implement once the PRs mentioned above have been merged.
 
-Most, if not all, of these inspections depend on the ability to inspect comments, and can't be implemented *yet*.
+Note that most of these could also be analyzed by PHPStan if it could properly understand (compiled) templates and how
+they are rendered. This is the aim of [another project](https://github.com/twigphp/Twig/discussions/4233) with the same
+name (but by a different author, [Ruud Kamphuis](https://github.com/ruudk).)
 
 ## Variable types
-* ❌ Invalid type (e.g., `{# @var i nit #}`)
-* ❌ Invalid object property or method (e.g., `{{ user.nmae }}`)
-* ❌ Undocumented context variable (i.e., missing `{# @var foo bool #}`)
-* ❌ Use of short-hand form (e.g., `{{ user.admin }}` instead of `isAdmin`) [Notice]
+* ⌛ Invalid type (e.g., `{# @var i nit #}`)
+* ⌛ Invalid object property or method (e.g., `{{ user.nmae }}`)
+* ⌛ Undocumented context variable (i.e., missing `{# @var foo bool #}`)
+* ⌛ Use of short-hand form (e.g., `{{ user.admin }}` instead of `isAdmin`) [Notice]
 
   Rationale: makes it hard to find usage of properties/methods
 * Non-stringable variable in string interpolation
@@ -88,5 +94,5 @@ Most, if not all, of these inspections depend on the ability to inspect comments
 ## Macros
 * ✅ Use of undeclared variables (arguments, `{% set %}`, etc)
 * ✅ Calls with *too many* arguments (except is `varargs` is used),
-* ❌ Calls with *too few* arguments
-* ❌ Type mismatch in macro call
+* ⌛ Calls with *too few* arguments
+* ⌛ Type mismatch in macro call
