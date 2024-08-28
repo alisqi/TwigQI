@@ -3,6 +3,7 @@
 namespace AlisQI\TwigStan;
 
 use AlisQI\TwigStan\Inspection\BadArgumentCountInMacroCall;
+use AlisQI\TwigStan\Inspection\RequiredMacroArgumentAfterOptional;
 use AlisQI\TwigStan\Inspection\UndeclaredVariableInMacro;
 use Twig\Extension\AbstractExtension;
 
@@ -12,6 +13,7 @@ class Extension extends AbstractExtension
     {
         return [
             new BadArgumentCountInMacroCall(),
+            new RequiredMacroArgumentAfterOptional(),
             new UndeclaredVariableInMacro(),
         ];
     }
