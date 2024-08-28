@@ -39,12 +39,15 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
 
             $signature = [];
             foreach ($node->getNode('arguments') as $name => $default) {
-                $signature[] = $name;
+                $signature[] = [
+                    'name'     => $name,
+                    'required' => $default->hasAttribute('is_implicit') // if attr is set, it's always true
+                ];
             }
 
             // add 'varargs' to signature if it's used anywhere (i.e., there's a NameExpression that uses it)
             if ($this->hasVarArgsNameExpressionDescendant($node)) {
-                $signature[] = self::VAR_ARGS;
+                $signature[] = ['name' => self::VAR_ARGS, 'required' => false];
             }
 
             $this->checkCalls($macroName, $signature);
@@ -64,15 +67,35 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
         return $node;
     }
 
+    /**
+     * @param array<array{name: string, required: bool}> $signature
+     */
     private function checkCalls(string $macro, array $signature): void
     {
         foreach (($this->macroCalls[$macro] ?? []) as [$argumentCount, $location]) {
+            // check for too _many_ arguments
+            $usesVarArgs = array_filter(
+                $signature,
+                static fn (array $argument) => $argument['name'] === self::VAR_ARGS
+            );
             if (
-                !in_array(self::VAR_ARGS, $signature, true) &&
+                !$usesVarArgs &&
                 $argumentCount > count($signature)
             ) {
                 trigger_error(
                     "Too many arguments ($argumentCount) for macro '$macro' (at $location)",
+                    E_USER_WARNING
+                );
+            }
+            
+            // check for too _few_ arguments
+            $requiredArguments = array_filter(
+                $signature,
+                static fn(array $param) => $param['required']
+            );
+            if ($argumentCount < count($requiredArguments)) {
+                trigger_error(
+                    "Too few arguments ($argumentCount) for macro '$macro' (at $location)",
                     E_USER_WARNING
                 );
             }

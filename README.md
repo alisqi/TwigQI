@@ -93,6 +93,6 @@ name (but by a different author, [Ruud Kamphuis](https://github.com/ruudk).)
 
 ## Macros
 * ✅ Use of undeclared variables (arguments, `{% set %}`, etc)
-* ✅ Calls with *too many* arguments (except is `varargs` is used),
-* ⌛ Calls with *too few* arguments
+* ✅ Calls with *too many* arguments (except if `varargs` is used),
+* ✅ Calls with *too few* arguments (arguments with no default are considered required)
 * ⌛ Type mismatch in macro call

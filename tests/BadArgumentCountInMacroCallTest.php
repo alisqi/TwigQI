@@ -37,18 +37,20 @@ class BadArgumentCountInMacroCallTest extends AbstractTestCase
             {% macro marco() %}
                 {{ varargs|length }}
             {% endmacro %}
+            {{ _self.marco() }}
             {{ _self.marco(1337) }}
+            {{ _self.marco(13, 37) }}
         EOF)->render();
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
         
         $this->env->createTemplate(<<<EOF
-            {% macro marco(polo) %}
+            {% macro marco2(polo) %}
                 {% if polo %}
                     {{ varargs|length }}
                 {% endif %}
             {% endmacro %}
-            {{ _self.marco(13, 37) }}
+            {{ _self.marco2(13, 37) }}
         EOF)->render();
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
@@ -65,34 +67,50 @@ class BadArgumentCountInMacroCallTest extends AbstractTestCase
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
-    
-    public function test_itWarnsForTooFewArguments(): void
+
+    public static function getTooFewArgumentsTestCases(): array
     {
-        self::markTestIncomplete('Cannot implement this feature. See README');
+        return [
+            [
+                '{% macro marco(polo = true) %}{% endmacro %} {{ _self.marco() }}',
+                []
+            ],
+            [
+                '{% macro marco(polo = null) %}{% endmacro %} {{ _self.marco() }}',
+                []
+            ],
+            [
+               '{% macro marco(po, lo = true) %}{% endmacro %}{{ _self.marco(1337) }}',
+                []
+            ],
+            [
+                '{% macro marco(polo) %}{% endmacro %} {{ _self.marco() }}',
+                ['Too few arguments (0)']
+            ],
+            [
+                '{% macro marco(po, lo) %}{% endmacro %} {{ _self.marco() }}',
+                ['Too few arguments (0)']
+            ],
+            [
+                '{% macro marco(po, lo) %}{% endmacro %} {{ _self.marco(1337) }}',
+                ['Too few arguments (1)']
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider getTooFewArgumentsTestCases
+     * @param list<string> $errors
+     */
+    public function test_itWarnsForTooFewArguments(string $template, array $errors): void
+    {
+        $this->env->createTemplate($template)->render();
         
-        $this->env->createTemplate(<<<EOF
-            {% macro marco(polo = null) %}{% endmacro %}
-            {{ _self.marco() }}
-        EOF)->render();
+        self::assertCount(count($errors), $this->errors);
         
-        self::assertEmpty($this->errors, implode(', ', $this->errors));
-        
-        $this->env->createTemplate(<<<EOF
-            {% macro marco(polo) %}{% endmacro %}
-            {{ _self.marco() }}
-        EOF)->render();
-        
-        self::assertCount(1, $this->errors);
-        
-        self::assertStringContainsString('marco', $this->errors[0]);
-        self::assertStringContainsStringIgnoringCase('too few', $this->errors[0]);
-        
-        $this->env->createTemplate(<<<EOF
-            {% macro marco(po, lo = true) %}{% endmacro %}
-            {{ _self.marco(1337) }}
-        EOF)->render();
-        
-        self::assertEmpty($this->errors, implode(', ', $this->errors));
+        foreach ($errors as $i => $error) {
+            self::assertStringContainsString($error, $this->errors[$i]);
+        }
     }
 
     public function test_importedMacro(): void
