@@ -138,6 +138,17 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
     
+    public function test_itSupportsSelf(): void
+    {
+        $this->env->createTemplate(<<<EOF
+            {% macro marco() %}
+                {{ _self }}
+            {% endmacro %}
+        EOF)->render();
+        
+        self::assertEmpty($this->errors, implode(', ', $this->errors));
+    }
+    
     public function test_itSupportsVarArgs(): void
     {
         $this->env->createTemplate(<<<EOF

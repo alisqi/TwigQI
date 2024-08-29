@@ -106,6 +106,7 @@ class UndeclaredVariableInMacro implements NodeVisitorInterface
 
         if (
             !$node->getAttribute('is_defined_test') &&
+            $variableName !== '_self' &&
             !str_starts_with($variableName, '__internal') &&
             !in_array($variableName, $this->declaredVariableNames, false) &&
             !in_array($variableName, self::SPECIAL_VARIABLE_NAMES, false)
