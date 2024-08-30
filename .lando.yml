@@ -1,4 +1,4 @@
-name: "twig-stan"
+name: "twigqi"
 services:
   php:
     api: 3
@@ -10,7 +10,7 @@ services:
       - composer install
     overrides:
         environment:
-            PHP_IDE_CONFIG: "serverName=twigstan"
+            PHP_IDE_CONFIG: "serverName=twigqi"
             XDEBUG_CONFIG: "client_host=host.docker.internal" # https://github.com/lando/lando/issues/2271
             XDEBUG_SESSION: 1 # always enable xdebug
 
