@@ -1,6 +1,6 @@
 <?php
 
-namespace AlisQI\TwigStan\Inspection;
+namespace AlisQI\TwigQI\Inspection;
 
 use Twig\Environment;
 use Twig\Node\Expression\MethodCallExpression;

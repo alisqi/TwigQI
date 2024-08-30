@@ -1,10 +1,10 @@
 <?php
 
-namespace AlisQI\TwigStan;
+namespace AlisQI\TwigQI;
 
-use AlisQI\TwigStan\Inspection\BadArgumentCountInMacroCall;
-use AlisQI\TwigStan\Inspection\RequiredMacroArgumentAfterOptional;
-use AlisQI\TwigStan\Inspection\UndeclaredVariableInMacro;
+use AlisQI\TwigQI\Inspection\BadArgumentCountInMacroCall;
+use AlisQI\TwigQI\Inspection\RequiredMacroArgumentAfterOptional;
+use AlisQI\TwigQI\Inspection\UndeclaredVariableInMacro;
 use Twig\Extension\AbstractExtension;
 
 class Extension extends AbstractExtension

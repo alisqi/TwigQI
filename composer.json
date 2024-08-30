@@ -1,6 +1,6 @@
 {
-    "name": "alisqi/twig-stan",
-    "description": "Static code analysis for Twig templates",
+    "name": "alisqi/twigqi",
+    "description": "Twig Quality Inspection extension",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -10,12 +10,12 @@
     ],
     "autoload": {
         "psr-4": {
-            "AlisQI\\TwigStan\\": "src/"
+            "AlisQI\\TwigQI\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "AlisQI\\TwigStan\\Tests\\": "tests/"
+            "AlisQI\\TwigQI\\Tests\\": "tests/"
         }
     },
     "require": {

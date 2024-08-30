@@ -1,6 +1,6 @@
 <?php
 
-use AlisQI\TwigStan\Tests\AbstractTestCase;
+use AlisQI\TwigQI\Tests\AbstractTestCase;
 
 class RequiredMacroArgumentAfterOptionalTest extends AbstractTestCase
 {

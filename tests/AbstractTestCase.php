@@ -1,8 +1,8 @@
 <?php
 
-namespace AlisQI\TwigStan\Tests;
+namespace AlisQI\TwigQI\Tests;
 
-use AlisQI\TwigStan\Extension;
+use AlisQI\TwigQI\Extension;
 use PHPUnit\Framework\TestCase;
 use Twig\Environment;
 use Twig\Loader\ArrayLoader;

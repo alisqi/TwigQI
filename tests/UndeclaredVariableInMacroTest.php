@@ -1,6 +1,6 @@
 <?php
 
-namespace AlisQI\TwigStan\Tests;
+namespace AlisQI\TwigQI\Tests;
 
 class UndeclaredVariableInMacroTest extends AbstractTestCase
 {

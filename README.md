@@ -1,5 +1,6 @@
-# TwigStan: static code analysis for twig templates
-This repo offers an extension to the [Twig templating](https://github.com/twigphp/Twig) engine which adds static code analysis.
+# TwigQI: The Twig Quality Inspector extension
+This repo offers an extension to the [Twig templating](https://github.com/twigphp/Twig) engine
+which adds compile-time and runtime code quality inspections for templates.
 
 Unlike other projects like [curlylint](https://www.curlylint.org/) and [djLint](https://www.djlint.com/docs/linter/),
 which focus on HTML, this tool exclusively analyzes the Twig code.
@@ -60,7 +61,7 @@ used for, well, errors, that the author(s) deem actual errors in code. For more 
 macro arguments always being optional), `E_USER_WARNING` is used.
 
 ## Challenges and limitations
-While implementing the first inspections, the authors ran into some limitations in the Twig extension design.
+While implementing the first inspections, I ran into some limitations in the Twig extension design.
 
 One seemingly simple is that there was no way to distinguish whether a `macro` argument has an explicit `null`
 default or an implicit one. `ExpressionParser->parseArguments()` (line 628) created identical ASTs for both.
@@ -68,10 +69,10 @@ default or an implicit one. `ExpressionParser->parseArguments()` (line 628) crea
 
 Another is that there is no way to specify types. While the `@var` comments in the example are supported by the
 [Symfony Support plugin](https://plugins.jetbrains.com/plugin/7219-symfony-support) for PHPStorm, Twig's parser does not
-add comments to the AST, meaning there's no way for extensions to process them. (A [PR to add support ](https://github.com/twigphp/Twig/pull/4009)
-was closed.)
+add comments to the AST, meaning there's no way for extensions to process them.
+(A [PR to add support ](https://github.com/twigphp/Twig/pull/4009) was closed.)
 
-The good news is that it looks like Twig will support a [`types` tag](https://github.com/twigphp/Twig/issues/4165). 🤞
+The good news is that Twig recently added the [`types` tag](https://github.com/twigphp/Twig/issues/4165).
 
 # Inspections
 Here's a list of inspections considered relevant.
@@ -79,11 +80,12 @@ Here's a list of inspections considered relevant.
 Those marked with ⌛ are (considered) possible to implement once the PRs mentioned above have been merged.
 
 Note that most of these could also be analyzed by PHPStan if it could properly understand (compiled) templates and how
-they are rendered. This is the aim of [another project](https://github.com/twigphp/Twig/discussions/4233) with the same
-name (but by a different author, [Ruud Kamphuis](https://github.com/ruudk).)
+they are rendered. This is the aim of [Ruud Kamphuis](https://github.com/ruudk)'s similar project,
+[TwigQI](https://github.com/twigphp/Twig/discussions/4233).
 
 ## Variable types
-* ⌛ Invalid type (e.g., `{# @var i nit #}`)
+* ⌛ Invalid type declared (e.g., `{# @var i nit #}`)
+* ⌛ Runtime type doesn't match declaration
 * ⌛ Invalid object property or method (e.g., `{{ user.nmae }}`)
 * ⌛ Undocumented context variable (i.e., missing `{# @var foo bool #}`)
 * ⌛ Use of short-hand form (e.g., `{{ user.admin }}` instead of `isAdmin`) [Notice]
@@ -92,7 +94,8 @@ name (but by a different author, [Ruud Kamphuis](https://github.com/ruudk).)
 * Non-stringable variable in string interpolation
 
 ## Macros
-* ✅ Use of undeclared variables (arguments, `{% set %}`, etc)
+* ⌛ Arguments not declared using `types`
+* ✅ Use of undefined variables (arguments, `{% set %}`, etc)
 * ✅ Calls with *too many* arguments (except if `varargs` is used),
 * ✅ Calls with *too few* arguments (arguments with no default are considered required)
 * ✅ Required argument (no explicit default) declared after optional
