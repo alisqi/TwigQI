@@ -51,6 +51,8 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
             }
 
             $this->checkCalls($macroName, $signature);
+            
+            unset($this->macroCalls[$macroName]); // remove logged calls to prevent collisions (macro with identical name in another template)
         } elseif ($node instanceof MethodCallExpression) {
             // when visiting a function call, log call
             $macroName = substr($node->getAttribute('method'), strlen('macro_'));

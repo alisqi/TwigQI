@@ -131,4 +131,22 @@ class BadArgumentCountInMacroCallTest extends AbstractTestCase
         self::assertStringContainsString('marco', $this->errors[1]);
         self::assertStringContainsStringIgnoringCase('too many', $this->errors[1]);
     }
+
+    public function test_duplicateMacroNamesInDifferentFiles(): void
+    {
+        $this->env->createTemplate(<<<EOF
+            {% macro marco(polo) %}
+                {{ polo }}
+            {% endmacro %}
+            {{ _self.marco('polo') }}
+        EOF)->render();
+        
+        $this->env->createTemplate(<<<EOF
+            {% macro marco() %}
+            {% endmacro %}
+            {{ _self.marco() }}
+        EOF)->render();
+        
+        self::assertEmpty($this->errors, implode(', ', $this->errors));
+    }
 }
