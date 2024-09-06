@@ -11,8 +11,6 @@ use Twig\NodeVisitor\NodeVisitorInterface;
 
 class BadArgumentCountInMacroCall implements NodeVisitorInterface
 {
-    private const VAR_ARGS = 'varargs';
-
     /**
      * The top-level array has the macro's name as keys and its calls as value.
      * Each call is represented as an array containing the number of arguments
@@ -47,7 +45,7 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
 
             // add 'varargs' to signature if it's used anywhere (i.e., there's a NameExpression that uses it)
             if ($this->hasVarArgsNameExpressionDescendant($node)) {
-                $signature[] = ['name' => self::VAR_ARGS, 'required' => false];
+                $signature[] = ['name' => MacroNode::VARARGS_NAME, 'required' => false];
             }
 
             $this->checkCalls($macroName, $signature);
@@ -78,7 +76,7 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
             // check for too _many_ arguments
             $usesVarArgs = array_filter(
                 $signature,
-                static fn (array $argument) => $argument['name'] === self::VAR_ARGS
+                static fn (array $argument) => $argument['name'] === MacroNode::VARARGS_NAME
             );
             if (
                 !$usesVarArgs &&
@@ -117,7 +115,7 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
     private function hasVarArgsNameExpressionDescendant(Node $node): bool {
         if (
             $node instanceof NameExpression &&
-            $node->getAttribute('name') === self::VAR_ARGS
+            $node->getAttribute('name') === MacroNode::VARARGS_NAME
         ) {
             return true;
         }
