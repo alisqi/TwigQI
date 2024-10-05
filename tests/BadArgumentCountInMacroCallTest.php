@@ -13,7 +13,7 @@ class BadArgumentCountInMacroCallTest extends AbstractTestCase
             {% macro polo(arg, gra) %}{% endmacro %}
             {{ _self.marco() }}
             {{ _self.polo(13, 37) }}
-        EOF)->render();
+        EOF);
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
@@ -23,7 +23,7 @@ class BadArgumentCountInMacroCallTest extends AbstractTestCase
         $this->env->createTemplate(<<<EOF
             {% macro marco() %}{% endmacro %}
             {{ _self.marco(1337) }}
-        EOF)->render();
+        EOF);
         
         self::assertCount(1, $this->errors);
         
@@ -40,7 +40,7 @@ class BadArgumentCountInMacroCallTest extends AbstractTestCase
             {{ _self.marco() }}
             {{ _self.marco(1337) }}
             {{ _self.marco(13, 37) }}
-        EOF)->render();
+        EOF);
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
         
@@ -51,7 +51,7 @@ class BadArgumentCountInMacroCallTest extends AbstractTestCase
                 {% endif %}
             {% endmacro %}
             {{ _self.marco2(13, 37) }}
-        EOF)->render();
+        EOF);
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
@@ -63,7 +63,7 @@ class BadArgumentCountInMacroCallTest extends AbstractTestCase
                 {{ polo|length }}
             {% endmacro %}
             {{ _self.marco() }}
-        EOF)->render();
+        EOF);
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
@@ -104,7 +104,7 @@ class BadArgumentCountInMacroCallTest extends AbstractTestCase
      */
     public function test_itWarnsForTooFewArguments(string $template, array $errors): void
     {
-        $this->env->createTemplate($template)->render();
+        $this->env->createTemplate($template);
         
         self::assertCount(count($errors), $this->errors);
         
@@ -139,13 +139,13 @@ class BadArgumentCountInMacroCallTest extends AbstractTestCase
                 {{ polo }}
             {% endmacro %}
             {{ _self.marco('polo') }}
-        EOF)->render();
+        EOF);
         
         $this->env->createTemplate(<<<EOF
             {% macro marco() %}
             {% endmacro %}
             {{ _self.marco() }}
-        EOF)->render();
+        EOF);
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }

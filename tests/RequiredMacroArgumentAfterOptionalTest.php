@@ -16,7 +16,7 @@ class RequiredMacroArgumentAfterOptionalTest extends AbstractTestCase
     /** @dataProvider getValidOrderTests */
     public function test_itDoesNotWarnForProperOrder(string $template): void
     {
-        $this->env->createTemplate($template)->render();
+        $this->env->createTemplate($template);
 
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
@@ -38,7 +38,7 @@ class RequiredMacroArgumentAfterOptionalTest extends AbstractTestCase
     /** @dataProvider getInvalidOrderTests */
     public function test_itWarnsForRequiredAfterOptionalArgument(string $template, $error): void
     {
-        $this->env->createTemplate($template)->render();
+        $this->env->createTemplate($template);
 
         self::assertCount(1, $this->errors);
 

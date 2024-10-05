@@ -10,7 +10,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
             {% macro marco() %}
                 {{ [foo, bar] }}
             {% endmacro %}
-        EOF)->render();
+        EOF);
         
         self::assertCount(2, $this->errors);
         
@@ -28,7 +28,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
             {% macro marco() %}
                 {{ foo|abs }}
             {% endmacro %}
-        EOF)->render();
+        EOF);
         
         self::assertCount(1, $this->errors);
         
@@ -39,7 +39,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
             {% macro marco() %}
                 {{ max(foo) }}
             {% endmacro %}
-        EOF)->render();
+        EOF);
         
         self::assertCount(1, $this->errors);
         
@@ -50,7 +50,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
             {% macro marco() %}
                 {{ "#{foo}" }}
             {% endmacro %}
-        EOF)->render();
+        EOF);
         
         self::assertCount(1, $this->errors);
         
@@ -61,7 +61,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
             {% macro marco() %}
                 {{ {(foo): true} }}
             {% endmacro %}
-        EOF)->render();
+        EOF);
         
         self::assertCount(1, $this->errors);
     }
@@ -71,7 +71,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
         $this->env->createTemplate(<<<EOF
             {% macro marco() %}{% endmacro %}
             {{ whoopiedoo }}
-        EOF)->render();
+        EOF);
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
@@ -82,7 +82,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
             {% macro marco(foo, bar) %}
                 {{ foo ~ bar }}
             {% endmacro %}
-        EOF)->render();
+        EOF);
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
@@ -94,7 +94,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
                 {% set foo, bar = true, true %}
                 {{ foo ~ bar }}
             {% endmacro %}
-        EOF)->render();
+        EOF);
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
@@ -105,7 +105,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
             {% macro marco() %}
                 {% set foo = bar %}
             {% endmacro %}
-        EOF)->render();
+        EOF);
         
         self::assertStringContainsString(
             'bar',
@@ -120,7 +120,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
                 {% set baz = bar %}
                 {% set foo = bar + baz %}
             {% endmacro %}
-        EOF)->render();
+        EOF);
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
@@ -133,7 +133,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
             {% macro marco() %}
                  {{ gloobar }}
             {% endmacro %}
-        EOF)->render();
+        EOF);
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
@@ -144,7 +144,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
             {% macro marco() %}
                 {{ _self }}
             {% endmacro %}
-        EOF)->render();
+        EOF);
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
@@ -156,7 +156,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
                 {{ varargs|length }}
             {% endmacro %}
             {{ _self.marco(13, 37) }}
-        EOF)->render();
+        EOF);
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
@@ -167,7 +167,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
             {% macro marco() %}
                 {{ polo is defined }}
             {% endmacro %}
-        EOF)->render();
+        EOF);
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
@@ -180,7 +180,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
                     {{ [loop, key, value] }}
                 {% endfor %}
             {% endmacro %}
-        EOF)->render();
+        EOF);
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
         
@@ -193,7 +193,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
                     {{ [loop, _key, value] }}
                 {% endfor %}
             {% endmacro %}
-        EOF)->render();
+        EOF);
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
         
@@ -205,7 +205,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
                 {% for key, value in {} %}{% endfor %}
                 {{ [loop, key, value] }}
             {% endmacro %}
-        EOF)->render();
+        EOF);
         
         self::assertCount(3, $this->errors);
         
@@ -217,7 +217,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
                 {% for value in {} %}{% endfor %}
                 {{ [_key] }}
             {% endmacro %}
-        EOF)->render();
+        EOF);
         
         self::assertCount(1, $this->errors);
         
@@ -229,7 +229,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
                 {% for polo in [] %}{% endfor %}
                 {{ polo }}
             {% endmacro %}
-        EOF)->render();
+        EOF);
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
@@ -240,7 +240,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
             {% macro marco() %}
                 {{ []|filter((key, value) => key and value) }}
             {% endmacro %}
-        EOF)->render();
+        EOF);
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
         
@@ -252,7 +252,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
                 {{ []|filter((key, value) => key and value) }}
                 {{ [key, value] }}
             {% endmacro %}
-        EOF)->render();
+        EOF);
         
         self::assertCount(2, $this->errors);
         
@@ -264,7 +264,7 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
                 {{ []|filter(polo => polo) }}
                 {{ [polo] }}
             {% endmacro %}
-        EOF)->render();
+        EOF);
         
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
