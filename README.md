@@ -11,11 +11,11 @@ For example, a `RuntimeError` is thrown when trying to use an undeclared variabl
 However, this only happens if the code is actually executed. In the logic is non-trivial, neither developer nor tests
 (if any even exist) might detect obvious mistakes such as a misspelled variable name.
 
-This project provides ways to increase code quality and prevent defects.
+This project provides ways to increase code quality and prevent defects by adding _compile-time inspections_.
 
 The two intended use cases are:
 * Add the extension to the `Twig\Environment` during development
-* Invoke a CLI command in CI or even pre-commit hook
+* Invoke a CLI command in CI and/or pre-commit hook which compiles all templates with the extension
 
 # Justification
 Just in case you need convincing, please consider the following example:
@@ -47,11 +47,11 @@ since Twig will call that method with `null`. Instead of just having a buggy bad
 # Usage
 Add the extension to your `Twig\Environment`.
 
-Any issues will be reported using PHP's `trigger_error`. Set up your app and/or CI build to report these as you see fit.
+Any issues will be reported using PHP's `trigger_error` with `E_USER_*` levels.
+Set up your app and/or CI build to report these as you see fit.
 
 # Design
-The current design requires separate `NodeVisitor` classes for every inspection. That allows for easy testing and
-configurability later.
+The current design uses `NodeVisitor` classes for every inspection. That allows for easy testing and configurability.
 
 The reason the inspections use `trigger_error` instead of `Exception`s is that the latter would halt compilation,
 preventing the extension from reporting multiple issues in one go.
@@ -84,19 +84,28 @@ they are rendered. This is the aim of [Ruud Kamphuis](https://github.com/ruudk)'
 [TwigQI](https://github.com/twigphp/Twig/discussions/4233).
 
 ## Variable types
-* ⌛ Invalid type declared (e.g., `{# @var i nit #}`)
+* ⌛ Invalid type declared (e.g., `{% types {i: 'nit'} %}`)
 * ⌛ Runtime type doesn't match declaration
 * ⌛ Invalid object property or method (e.g., `{{ user.nmae }}`)
-* ⌛ Undocumented context variable (i.e., missing `{# @var foo bool #}`)
+* ⌛ Undocumented context variable (i.e., missing `{% types %}`)
 * ⌛ Use of short-hand form (e.g., `{{ user.admin }}` instead of `isAdmin`) [Notice]
 
   Rationale: makes it hard to find usage of properties/methods
 * Non-stringable variable in string interpolation
 
+## Constants
+* ✅ Invalid constant (e.g., `constant('BAD')`)
+* ✅ Expressions as first argument (e.g., `constant('UH' ~ 'OH')`)
+ 
+  This is opinionated, as it can work perfectly fine
+* ✅ Second argument (object) is not a name (e.g., `constant('CONST', {})`)
+  
+  This is opinionated, too: `constant('CONST', foo ?: bar)` can work fine
+
 ## Macros
 * ⌛ Arguments not declared using `types`
 * ✅ Use of undefined variables (arguments, `{% set %}`, etc)
-* ✅ Calls with *too many* arguments (except if `varargs` is used),
+* ✅ Calls with *too many* arguments (except if `varargs` is used)
 * ✅ Calls with *too few* arguments (arguments with no default are considered required)
 * ✅ Required argument (no explicit default) declared after optional
 * ⌛ Type mismatch in macro call
