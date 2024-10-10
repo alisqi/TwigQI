@@ -80,8 +80,7 @@ Here's a list of inspections considered relevant.
 Those marked with ⌛ are (considered) possible to implement once the PRs mentioned above have been merged.
 
 Note that most of these could also be analyzed by PHPStan if it could properly understand (compiled) templates and how
-they are rendered. This is the aim of [Ruud Kamphuis](https://github.com/ruudk)'s similar project,
-[TwigQI](https://github.com/twigphp/Twig/discussions/4233).
+they are rendered. This is the aim of a similar project: [TwigStan](https://github.com/twigstan/twigstan).
 
 ## Variable types
 * ⌛ Invalid type declared (e.g., `{% types {i: 'nit'} %}`)
