@@ -56,6 +56,12 @@ class ValidTypes implements NodeVisitorInterface
         }
 
         if (preg_match_all(self::FQN_REGEX, $type)) {
+            if (!class_exists($type)) {
+                trigger_error(
+                    "Class '$type' for variable '$name' does not exist.",
+                    E_USER_ERROR
+                );
+            }
             return;
         }
 

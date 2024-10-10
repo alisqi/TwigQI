@@ -22,8 +22,9 @@ class InvalidTypesTest extends AbstractTestCase
             ["resource", false],
             
             ["\\\\Exception", true],
-            ["\\\\App\\\\Exception", true],
+            ["\\\\Twig\\\\Token", true],
             ["Exception", false],
+            ["\\\\Foo", false],
             ["\\\\Inv alid", false],
             ["\\\\Inv-alid", false],
             ["\\\\App\\\\", false],
