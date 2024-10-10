@@ -6,6 +6,7 @@ use AlisQI\TwigQI\Inspection\BadArgumentCountInMacroCall;
 use AlisQI\TwigQI\Inspection\InvalidConstant;
 use AlisQI\TwigQI\Inspection\RequiredMacroArgumentAfterOptional;
 use AlisQI\TwigQI\Inspection\UndeclaredVariableInMacro;
+use AlisQI\TwigQI\Inspection\ValidTypes;
 use Twig\Extension\AbstractExtension;
 
 class Extension extends AbstractExtension
@@ -17,6 +18,7 @@ class Extension extends AbstractExtension
             new InvalidConstant(),
             new RequiredMacroArgumentAfterOptional(),
             new UndeclaredVariableInMacro(),
+            new ValidTypes(),
         ];
     }
 }
