@@ -62,5 +62,31 @@ class InvalidTypesTest extends AbstractTestCase
             implode(', ', $this->errors)
         );
     }
-    
+
+    public static function getNullableTypes(): array
+    {
+        return [
+            ['?boolean', true],
+            ['?iterable', true],
+            ['?object', true],
+            ['?\\\\Exception', true],
+
+            ['??boolean', false],
+            ['!boolean', false],
+            ['boolean|null', false],
+            ['boolean?', false],
+        ];
+    }
+
+    /** @dataProvider getNullableTypes */
+    public function test_nullableShorthand(string $type, bool $isValid): void
+    {
+        $this->env->createTemplate("{% types {foo: '$type'} %}");
+
+        self::assertEquals(
+            $isValid,
+            empty($this->errors),
+            implode(', ', $this->errors)
+        );
+    }
 }

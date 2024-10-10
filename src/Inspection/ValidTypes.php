@@ -43,6 +43,10 @@ class ValidTypes implements NodeVisitorInterface
 
     private function validateType(string $name, string $type, string $location): void
     {
+        if ($type[0] === '?') {
+            $type = substr($type, 1);
+        }
+        
         if (in_array($type, self::BASIC_TYPES)) {
             return;
         }
