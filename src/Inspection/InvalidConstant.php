@@ -5,7 +5,6 @@ namespace AlisQI\TwigQI\Inspection;
 use Twig\Environment;
 use Twig\Node\Expression\ConstantExpression;
 use Twig\Node\Expression\FunctionExpression;
-use Twig\Node\Expression\MethodCallExpression;
 use Twig\Node\Expression\NameExpression;
 use Twig\Node\Node;
 use Twig\NodeVisitor\NodeVisitorInterface;
@@ -87,7 +86,7 @@ class InvalidConstant implements NodeVisitorInterface
         return $node;
     }
 
-    public function getPriority()
+    public function getPriority(): int
     {
         return 0;
     }
