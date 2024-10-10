@@ -49,7 +49,7 @@ class ValidTypes implements NodeVisitorInterface
 
         if ($replacement = (self::DEPRECATED_TYPES[$type] ?? null)) {
             trigger_error(
-                "Deprecated type '$type' used. Use '$replacement' instead.",
+                "Deprecated type '$type' used (at $location). Use '$replacement' instead.",
                 E_USER_DEPRECATED
             );
             return;

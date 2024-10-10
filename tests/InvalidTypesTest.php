@@ -57,7 +57,7 @@ class InvalidTypesTest extends AbstractTestCase
         $this->env->createTemplate("{% types {foo: '$type'} %}");
 
         self::assertStringContainsString(
-            "Deprecated type '$type' used.",
+            "Deprecated type '$type' used",
             implode(', ', $this->errors)
         );
     }
