@@ -7,27 +7,33 @@ class InvalidTypesTest extends AbstractTestCase
     public static function getTypes(): array
     {
         return [
-            ["{}", true],
-            ["{foo: 'string'}", true],
-            ["{foo: 'number'}", true],
-            ["{foo: 'boolean'}", true],
-            ["{foo: 'null'}", true],
-            ["{foo: 'iterable'}", true],
-            ["{foo: 'object'}", true],
+            ["string", true],
+            ["number", true],
+            ["boolean", true],
+            ["null", true],
+            ["iterable", true],
+            ["object", true],
             
-            ["{foo: 'bar'}", false],
-            ["{foo: '[]'}", false],
-            ["{foo: '{}'}", false],
-            ["{foo: 'any'}", false],
-            ["{foo: 'mixed'}", false],
-            ["{foo: 'resource'}", false],
+            ["bar", false],
+            ["[]", false],
+            ["{}", false],
+            ["any", false],
+            ["mixed", false],
+            ["resource", false],
+            
+            ["\\\\Exception", true],
+            ["\\\\App\\\\Exception", true],
+            ["Exception", false],
+            ["\\\\Inv alid", false],
+            ["\\\\Inv-alid", false],
+            ["\\\\App\\\\", false],
         ];
     }
 
     /** @dataProvider getTypes */
-    public function test_itValidatesTypes(string $types, bool $isValid): void
+    public function test_itValidatesTypes(string $type, bool $isValid): void
     {
-        $this->env->createTemplate("{% types $types %}");
+        $this->env->createTemplate("{% types {foo: '$type'} %}");
 
         self::assertEquals(
             $isValid,

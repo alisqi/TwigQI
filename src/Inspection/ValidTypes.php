@@ -18,6 +18,8 @@ class ValidTypes implements NodeVisitorInterface
         'object',
     ];
 
+    private const FQN_REGEX = '/^\\\\[A-Za-z_][A-Za-z0-9_]*(\\\\[A-Za-z_][A-Za-z0-9_]*)*$/';
+    
     public function enterNode(Node $node, Environment $env): Node
     {
         if ($node instanceof TypesNode) {
@@ -35,7 +37,7 @@ class ValidTypes implements NodeVisitorInterface
 
         $errors = [];
         foreach ($node->getAttribute('mapping') as $name => ['type' => $type]) {
-            if (!in_array($type, self::BASIC_TYPES)) {
+            if (!$this->isValidType($type)) {
                 $errors[] = "Invalid type '$type' for variable '$name'";
             }
         }
@@ -43,6 +45,19 @@ class ValidTypes implements NodeVisitorInterface
         foreach ($errors as $error) {
             trigger_error("Invalid types: $error (at $location)", E_USER_ERROR);
         }
+    }
+
+    private function isValidType(string $type): bool
+    {
+        if (in_array($type, self::BASIC_TYPES)) {
+            return true;
+        }
+        
+        if (preg_match_all(self::FQN_REGEX, $type)) {
+            return true;
+        }
+        
+        return false;
     }
 
     public function leaveNode(Node $node, Environment $env): ?Node
