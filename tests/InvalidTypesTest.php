@@ -42,4 +42,24 @@ class InvalidTypesTest extends AbstractTestCase
         );
     }
 
+    public static function getDeprecatedTypes(): array
+    {
+        return [
+          ['bool'],  
+          ['int'],  
+          ['float'],  
+        ];
+    }
+    
+    /** @dataProvider getDeprecatedTypes */
+    public function test_deprecatedTypes(string $type): void
+    {
+        $this->env->createTemplate("{% types {foo: '$type'} %}");
+
+        self::assertStringContainsString(
+            "Deprecated type '$type' used.",
+            implode(', ', $this->errors)
+        );
+    }
+    
 }

@@ -18,8 +18,14 @@ class ValidTypes implements NodeVisitorInterface
         'object',
     ];
 
+    private const DEPRECATED_TYPES = [
+        'bool' => 'boolean',
+        'int' => 'number',
+        'float' => 'number',
+    ];
+
     private const FQN_REGEX = '/^\\\\[A-Za-z_][A-Za-z0-9_]*(\\\\[A-Za-z_][A-Za-z0-9_]*)*$/';
-    
+
     public function enterNode(Node $node, Environment $env): Node
     {
         if ($node instanceof TypesNode) {
@@ -52,11 +58,17 @@ class ValidTypes implements NodeVisitorInterface
         if (in_array($type, self::BASIC_TYPES)) {
             return true;
         }
-        
+       
+        if (array_key_exists($type, self::DEPRECATED_TYPES)) {
+            $replacement = self::DEPRECATED_TYPES[$type];
+            trigger_error("Deprecated type '$type' used. Use '$replacement' instead.", E_USER_DEPRECATED);
+            return true;
+        }
+
         if (preg_match_all(self::FQN_REGEX, $type)) {
             return true;
         }
-        
+
         return false;
     }
 
