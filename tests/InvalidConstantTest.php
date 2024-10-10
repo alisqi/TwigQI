@@ -64,6 +64,7 @@ class InvalidConstantTest extends AbstractTestCase
             ['constant(_self, _self)', 'first argument must be string'],
             ['constant("const", true)', 'second argument must be a variable name'],
             ['constant("const", {})', 'second argument must be a variable name'],
+            ['constant("const", _self, true)', 'too many arguments'],
         ];
     }
 
