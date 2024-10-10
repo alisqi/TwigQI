@@ -29,47 +29,40 @@ class ValidTypes implements NodeVisitorInterface
     public function enterNode(Node $node, Environment $env): Node
     {
         if ($node instanceof TypesNode) {
-            $this->checkTypes($node);
+            $sourcePath = ($node->getSourceContext() ?? $node->getNode('node')->getSourceContext())?->getPath()
+                ?? 'unknown';
+            $location = "$sourcePath:{$node->getTemplateLine()}";
+
+            foreach ($node->getAttribute('mapping') as $name => ['type' => $type]) {
+                $this->validateType($name, $type, $location);
+            }
         }
 
         return $node;
     }
 
-    private function checkTypes(TypesNode $node): void
-    {
-        $sourcePath = ($node->getSourceContext() ?? $node->getNode('node')->getSourceContext())?->getPath()
-            ?? 'unknown';
-        $location = "$sourcePath:{$node->getTemplateLine()}";
-
-        $errors = [];
-        foreach ($node->getAttribute('mapping') as $name => ['type' => $type]) {
-            if (!$this->isValidType($type)) {
-                $errors[] = "Invalid type '$type' for variable '$name'";
-            }
-        }
-
-        foreach ($errors as $error) {
-            trigger_error("Invalid types: $error (at $location)", E_USER_ERROR);
-        }
-    }
-
-    private function isValidType(string $type): bool
+    private function validateType(string $name, string $type, string $location): void
     {
         if (in_array($type, self::BASIC_TYPES)) {
-            return true;
+            return;
         }
-       
-        if (array_key_exists($type, self::DEPRECATED_TYPES)) {
-            $replacement = self::DEPRECATED_TYPES[$type];
-            trigger_error("Deprecated type '$type' used. Use '$replacement' instead.", E_USER_DEPRECATED);
-            return true;
+
+        if ($replacement = (self::DEPRECATED_TYPES[$type] ?? null)) {
+            trigger_error(
+                "Deprecated type '$type' used. Use '$replacement' instead.",
+                E_USER_DEPRECATED
+            );
+            return;
         }
 
         if (preg_match_all(self::FQN_REGEX, $type)) {
-            return true;
+            return;
         }
 
-        return false;
+        trigger_error(
+            "Invalid type '$type' for variable '$name' (at $location)",
+            E_USER_ERROR
+        );
     }
 
     public function leaveNode(Node $node, Environment $env): ?Node
