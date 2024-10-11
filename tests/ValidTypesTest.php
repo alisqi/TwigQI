@@ -2,7 +2,7 @@
 
 namespace AlisQI\TwigQI\Tests;
 
-class InvalidTypesTest extends AbstractTestCase
+class ValidTypesTest extends AbstractTestCase
 {
     public static function getTypes(): array
     {
