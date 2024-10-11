@@ -16,6 +16,7 @@ class ValidTypes implements NodeVisitorInterface
         'null',
         'iterable',
         'object',
+        'mixed',
     ];
 
     private const DEPRECATED_TYPES = [
@@ -63,13 +64,9 @@ class ValidTypes implements NodeVisitorInterface
         }
 
         if (preg_match_all(self::FQN_REGEX, $type)) {
-            if (!class_exists($type)) {
-                trigger_error(
-                    "Class '$type' for variable '$name' does not exist.",
-                    E_USER_ERROR
-                );
+            if (class_exists($type) || interface_exists($type) || trait_exists($type)) {
+                return;
             }
-            return;
         }
 
         trigger_error(

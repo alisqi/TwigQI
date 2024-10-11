@@ -13,15 +13,17 @@ class InvalidTypesTest extends AbstractTestCase
             ["null", true],
             ["iterable", true],
             ["object", true],
+            ["mixed", true],
             
             ["bar", false],
             ["[]", false],
             ["{}", false],
             ["any", false],
-            ["mixed", false],
             ["resource", false],
             
             ["\\\\Exception", true],
+            ["\\\\Iterator", true],
+            ["\\\\PHPUnit\\\\Framework\\\\MockObject\\\\Method", true],
             ["\\\\Twig\\\\Token", true],
             ["Exception", false],
             ["\\\\Foo", false],
