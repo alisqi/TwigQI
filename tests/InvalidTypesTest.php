@@ -89,4 +89,31 @@ class InvalidTypesTest extends AbstractTestCase
             implode(', ', $this->errors)
         );
     }
+
+    public static function getArrayTypes(): array
+    {
+        return [
+            ['number[]', true],
+            ['?number[]', true],
+            ['object[]', true],
+            ['iterable[]', true],
+
+            ['number[][]', false],
+            ['[]number', false],
+            ['[number]', false],
+            ['[][]', false],
+        ];
+    }
+
+    /** @dataProvider getArrayTypes */
+    public function test_arrayTypes(string $type, bool $isValid): void
+    {
+        $this->env->createTemplate("{% types {foo: '$type'} %}");
+
+        self::assertEquals(
+            $isValid,
+            empty($this->errors),
+            implode(', ', $this->errors)
+        );
+    }
 }

@@ -46,6 +46,9 @@ class ValidTypes implements NodeVisitorInterface
         if ($type[0] === '?') {
             $type = substr($type, 1);
         }
+        if (str_ends_with($type, '[]')) {
+            $type = substr($type, 0, -2);
+        }
         
         if (in_array($type, self::BASIC_TYPES)) {
             return;
