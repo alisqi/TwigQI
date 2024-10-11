@@ -92,23 +92,36 @@ class ValidTypesTest extends AbstractTestCase
         );
     }
 
-    public static function getArrayTypes(): array
+    public static function getIterableTypes(): array
     {
         return [
             ['number[]', true],
             ['?number[]', true],
             ['object[]', true],
-            ['iterable[]', true],
+            ['iterable', true],
 
             ['number[][]', false],
             ['[]number', false],
             ['[number]', false],
             ['[][]', false],
+            
+            ['iterable<number>', true],
+            ['iterable<number, string>', true],
+            ['iterable<number,number>', true],
+            ['iterable<string, ?number>', true],
+            ['iterable<string, iterable<number>>', true],
+
+            ['iterable<boolean, number>', false],
+            ['iterable<iterable, number>', false],
+            ['iterable<string, iterable<number>', false],
+            ['iterable<string, iterable<whoops>>', false],
+            ['iterable{string}', false],
+            ['iterable<>', false],
         ];
     }
 
-    /** @dataProvider getArrayTypes */
-    public function test_arrayTypes(string $type, bool $isValid): void
+    /** @dataProvider getIterableTypes */
+    public function test_iterableTypes(string $type, bool $isValid): void
     {
         $this->env->createTemplate("{% types {foo: '$type'} %}");
 

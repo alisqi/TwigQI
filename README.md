@@ -17,6 +17,8 @@ The two intended use cases are:
 * Add the extension to the `Twig\Environment` during development
 * Invoke a CLI command in CI and/or pre-commit hook which compiles all templates with the extension
 
+This won't solve every single edge case or possibility, and it's opinionated. You've been warned.
+
 # Justification
 Just in case you need convincing, please consider the following example:
 

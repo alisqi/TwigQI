@@ -51,6 +51,15 @@ class ValidTypes implements NodeVisitorInterface
             $type = substr($type, 0, -2);
         }
         
+        if (str_starts_with($type, 'iterable') && $type !== 'iterable') {
+            $matches = [];
+            if (preg_match('/<(?>(string|number),\s*)?(.+)>/', substr($type, 8), $matches)) {
+                [, , $valueType] = $matches;
+                $this->validateType($name, $valueType, $location);
+                return;
+            } // else not valid!
+        }
+        
         if (in_array($type, self::BASIC_TYPES)) {
             return;
         }
