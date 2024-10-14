@@ -1,6 +1,6 @@
 # TwigQI: Static code analysis for Twig templates
 Twig Quality Inspections is an extension to the [Twig templating](https://github.com/twigphp/Twig) engine
-which adds static analysis (i.e., compile-time) and runtime assertions to increase templates quality.
+which adds static analysis (i.e., compile-time) and runtime assertions to increase templates' quality.
 
 Unlike other projects like [curlylint](https://www.curlylint.org/) and [djLint](https://www.djlint.com/docs/linter/),
 which focus on HTML, this tool exclusively analyzes the Twig code.

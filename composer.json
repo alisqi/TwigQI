@@ -1,6 +1,6 @@
 {
     "name": "alisqi/twigqi",
-    "description": "Twig Quality Inspection extension",
+    "description": "Static code analysis for Twig templates",
     "type": "library",
     "license": "MIT",
     "authors": [
