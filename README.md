@@ -82,7 +82,7 @@ Here's the list of types supported by TwigQI:
 * Class names (FQN, with a starting backslash. Note that backslashes must be escaped in Twig strings!)
 * Three types of iterables, with increasing specificity
   * `iterable` declares nothing more or less than that the variable is iterable
-  * `iterable<ValueType>`
+  * `iterable<ValueType>` declares the values' type
   * `iterable<number, ValueType>` and `iterable<string, ValueType>` does the same for keys
   
   You can create recursive types: `iterable<string, iterable<number, iterable<string>>>`
@@ -131,3 +131,7 @@ no explicit default value as required.
 * ✅ Calls with *too few* arguments
 * ✅ Required argument declared after optional
 * ⌛ Type mismatch in macro call
+
+# Acknowledgments
+Big thanks to [Ruud Kamphuis](https://github.com/ruudk) for [TwigStan](https://github.com/twigstan/twigstan),
+and for helping on this very project.
