@@ -19,12 +19,12 @@ final class AssertedTypesNode extends Node
     {
         parent::compile($compiler); // compile the original TypesNode (which doesn't do anything)
 
-        foreach ($this->getNode('types')->getAttribute('mapping') as $name => ['type' => $type]) {
-            $this->compileTypeAssertions($compiler, $name, $type);
+        foreach ($this->getNode('types')->getAttribute('mapping') as $name => ['type' => $type, 'optional' => $optional]) {
+            $this->compileTypeAssertions($compiler, $name, $type, $optional);
         }
     }
 
-    private function compileTypeAssertions(Compiler $compiler, string $name, string $type): void
+    private function compileTypeAssertions(Compiler $compiler, string $name, string $type, bool $optional): void
     {
         $isNullable = false;
         if (str_starts_with($type, '?')) {
@@ -32,14 +32,36 @@ final class AssertedTypesNode extends Node
             $type = substr($type, 1);
         }
 
-        if (!$isNullable) {
-            $compiler->raw('if (is_null($context[')
-                ->string($name)
-                ->raw('])) {')
-                ->indent()
-                ->write('trigger_error("Non-nullable variable \'$name\' is null", E_USER_ERROR);')
-                ->outdent()
-                ->write('}');
+        if (!$optional) {
+            $this->assertVariableExists($compiler, $name);
         }
+
+        if (!$isNullable) {
+            $this->assertVariableIsNotNull($compiler, $name);
+        }
+    }
+
+    public function assertVariableExists(Compiler $compiler, string $name): void
+    {
+        $compiler->raw('if (!array_key_exists(')
+            ->string($name)
+            ->raw(', $context)) {')
+            ->indent()
+            ->write('trigger_error("Non-optional variable \'$name\' is not set", E_USER_ERROR);')
+            ->outdent()
+            ->write('}');
+    }
+
+    public function assertVariableIsNotNull(Compiler $compiler, string $name): void
+    {
+        $compiler->raw('if (array_key_exists(')
+            ->string($name)
+            ->raw(', $context) && is_null($context[')
+            ->string($name)
+            ->raw('])) {')
+            ->indent()
+            ->write('trigger_error("Non-nullable variable \'$name\' is null", E_USER_ERROR);')
+            ->outdent()
+            ->write('}');
     }
 }
