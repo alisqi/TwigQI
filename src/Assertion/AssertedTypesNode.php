@@ -19,7 +19,11 @@ final class AssertedTypesNode extends Node
     {
         parent::compile($compiler); // compile the original TypesNode (which doesn't do anything)
 
-        foreach ($this->getNode('types')->getAttribute('mapping') as $name => ['type' => $type, 'optional' => $optional]) {
+        foreach (
+            $this->getNode('types')->getAttribute(
+                'mapping'
+            ) as $name => ['type' => $type, 'optional' => $optional]
+        ) {
             $this->compileTypeAssertions($compiler, $name, $type, $optional);
         }
     }
@@ -39,6 +43,8 @@ final class AssertedTypesNode extends Node
         if (!$isNullable) {
             $this->assertVariableIsNotNull($compiler, $name);
         }
+
+        $this->assertType($compiler, $name, $type);
     }
 
     public function assertVariableExists(Compiler $compiler, string $name): void
@@ -64,4 +70,46 @@ final class AssertedTypesNode extends Node
             ->outdent()
             ->write('}');
     }
+
+    private function assertType(Compiler $compiler, string $name, string $type): void
+    {
+        $functions = match ($type) {
+            'string' => 'is_string',
+            'number' => ['is_int', 'is_float'],
+            'boolean' => 'is_bool',
+            'object' => 'is_object',
+            // no point in asserting 'mixed'
+            default => null,
+        };
+
+        if ($functions === null) {
+            return;
+        }
+
+        if (!is_array($functions)) {
+            $functions = [$functions];
+        }
+
+        $compiler->raw('if (($value = $context[')
+            ->string($name)
+            ->raw("] ?? null) !== null && !(");
+
+        $first = true;
+        foreach ($functions as $fn) {
+            if (!$first) {
+                $compiler->raw(' || ');
+            }
+            $first = false;
+
+            $compiler->raw("$fn(\$value)");
+        }
+
+        $compiler->raw(')) {')
+            ->indent()
+            ->write('trigger_error("Type for variable \'$name\' does not match", E_USER_ERROR);')
+            ->outdent()
+            ->write('}')
+            ->write('unset($value);');
+    }
+
 }
