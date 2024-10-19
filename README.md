@@ -105,6 +105,7 @@ they are rendered. This is the aim of a similar project: [TwigStan](https://gith
 ## Variable types
 * ✅ Invalid type declared (e.g., `{% types {i: 'nit'} %}`)
 * ⌛ Runtime type doesn't match declaration
+* ✅ Runtime variable is null when type is not nullable
 * ⌛ Invalid object property or method (e.g., `{{ user.nmae }}`)
 * ⌛ Undocumented context variable (i.e., missing in `{% types %}`)
 * ⌛ Use of short-hand form (e.g., `{{ user.admin }}` instead of `isAdmin`) [Notice]

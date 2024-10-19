@@ -2,6 +2,7 @@
 
 namespace AlisQI\TwigQI;
 
+use AlisQI\TwigQI\Assertion\WrapTypesInAssertedTypes;
 use AlisQI\TwigQI\Inspection\BadArgumentCountInMacroCall;
 use AlisQI\TwigQI\Inspection\InvalidConstant;
 use AlisQI\TwigQI\Inspection\RequiredMacroArgumentAfterOptional;
@@ -19,6 +20,7 @@ class Extension extends AbstractExtension
             new RequiredMacroArgumentAfterOptional(),
             new UndeclaredVariableInMacro(),
             new ValidTypes(),
+            new WrapTypesInAssertedTypes(),
         ];
     }
 }
