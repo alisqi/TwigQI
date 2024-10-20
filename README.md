@@ -1,5 +1,8 @@
 # TwigQI: Static code analysis for Twig templates
 
+[![License](https://img.shields.io/github/license/alisqi/TwigQI.svg)](https://github.com/alisqi/TwigQI/blob/main/LICENSE)
+[![PHP Version](https://img.shields.io/badge/php-%3E%3D%208.1-8892BF.svg)](https://php.net)
+[![Build Status](https://github.com/alisqi/TwigQI/actions/workflows/test.yml/badge.svg)](https://github.com/alisqi/TwigQI/actions)
 [![codecov](https://codecov.io/gh/alisqi/TwigQI/graph/badge.svg?token=G3AE3RE4K0)](https://codecov.io/gh/alisqi/TwigQI)
 
 Twig Quality Inspections is an extension to the [Twig templating](https://github.com/twigphp/Twig) engine
