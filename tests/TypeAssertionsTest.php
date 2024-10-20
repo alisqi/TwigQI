@@ -2,6 +2,7 @@
 
 namespace AlisQI\TwigQI\Tests;
 
+use ArrayIterator;
 use Exception;
 
 class TypeAssertionsTest extends AbstractTestCase
@@ -100,6 +101,46 @@ class TypeAssertionsTest extends AbstractTestCase
             ['object', 'object', false],
             ['object', true, false],
             ['object', [], false],
+
+            ['iterable', [], true],
+            ['iterable', [13, 37], true],
+            ['iterable', new ArrayIterator([13, 37]), true],
+            ['iterable', ['foo' => 'bar'], true],
+            ['iterable', 'hello', false],
+
+            ['iterable<string>', [], true],
+            ['iterable<string>', ['hello'], true],
+            ['iterable<string>', new ArrayIterator(['hello']), true],
+            ['iterable<string>', [1337], false],
+            ['iterable<string>', 'hello', false],
+
+            ['string[]', [], true],
+            ['string[]', ['foo'], true],
+            ['string[]', 'foo', false],
+            ['string[]', [1337], false],
+
+            ['iterable<string, string>', [], true],
+            ['iterable<string, string>', ['foo' => 'bar'], true],
+            ['iterable<string, string>', new ArrayIterator(['foo' => 'bar']), true],
+            ['iterable<string, string>', ['foo' => 1337], false],
+            ['iterable<string, string>', ['foo' => ['bar']], false],
+            ['iterable<string, string>', [13, 37], false],
+
+            ['iterable<number, number>', [], true],
+            ['iterable<number, number>', [13, 37], true],
+            ['iterable<number, number>', [13 => 37], true],
+            ['iterable<number, number>', new ArrayIterator([13 => 37]), true],
+            ['iterable<number, number>', ['13' => 37], true],
+            ['iterable<number, number>', ['leet' => 1337], false],
+
+            ['iterable<string, iterable<string>>', ['foo' => ['bar']], true],
+            ['iterable<string, iterable<number>>', ['foo' => [13, 37]], true],
+            ['iterable<string, iterable<string>>', ['foo' => [13, 37]], false],
+
+            ['iterable<iterable<iterable<string, number>>>', [[[]]], true],
+            ['iterable<iterable<iterable<string, number>>>', [[['foo' => 1337]]], true],
+            ['iterable<iterable<iterable<string, number>>>', [[[13, 37]]], false],
+            ['iterable<iterable<iterable<string, number>>>', [[['foo' => 'bar']]], false],
         ];
     }
 
