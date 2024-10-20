@@ -73,43 +73,18 @@ final class AssertedTypesNode extends Node
 
     private function assertType(Compiler $compiler, string $name, string $type): void
     {
-        $functions = match ($type) {
-            'string' => 'is_string',
-            'number' => ['is_int', 'is_float'],
-            'boolean' => 'is_bool',
-            'object' => 'is_object',
-            // no point in asserting 'mixed'
-            default => null,
-        };
-
-        if ($functions === null) {
-            return;
-        }
-
-        if (!is_array($functions)) {
-            $functions = [$functions];
-        }
-
-        $compiler->raw('if (($value = $context[')
+        $compiler
+            ->raw('if (($value = $context[')
             ->string($name)
-            ->raw("] ?? null) !== null && !(");
-
-        $first = true;
-        foreach ($functions as $fn) {
-            if (!$first) {
-                $compiler->raw(' || ');
-            }
-            $first = false;
-
-            $compiler->raw("$fn(\$value)");
-        }
-
-        $compiler->raw(')) {')
+            ->raw('] ?? null) !== null && !\AlisQI\TwigQI\Assertion\AssertType::matches($value, ')
+            ->string($type)
+            ->raw(')) {' . PHP_EOL)
             ->indent()
-            ->write('trigger_error("Type for variable \'$name\' does not match", E_USER_ERROR);')
+            ->write('trigger_error(sprintf("Type for variable \'%s\' does not match", ')
+            ->string($name)
+            ->write('), E_USER_ERROR);' . PHP_EOL)
             ->outdent()
-            ->write('}')
+            ->write('}' . PHP_EOL)
             ->write('unset($value);');
     }
-
 }
