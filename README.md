@@ -103,10 +103,10 @@ Note that most of these could also be analyzed by PHPStan if it could properly u
 they are rendered. This is the aim of a similar project: [TwigStan](https://github.com/twigstan/twigstan).
 
 ## Typed variables
-* ✅ Invalid type declared (e.g., `{% types {i: 'nit'} %}`)
-* ✅ Context contains variable (unless defined as optional)
-* ✅ Runtime variable is null when type is not nullable
-* ✅ Runtime type doesn't match declaration
+* ✅ Declared types is invalid (e.g., `{% types {i: 'nit'} %}`)
+* ✅ Context does not contain non-optional variable
+* ✅ Runtime: non-nullable variable is null
+* ✅ Runtime: variable does not match type
 * ⌛ Invalid object property or method (e.g., `{{ user.nmae }}`)
 * ⌛ Undocumented context variable (i.e., missing in `{% types %}`)
 * ⌛ Use of short-hand form (e.g., `{{ user.admin }}` instead of `isAdmin`) [Notice]
@@ -128,9 +128,9 @@ While Twig considers all macro arguments optional (and provides `null` as a defa
 no explicit default value as required.
 
 * ⌛ Arguments not declared using `types`
-* ✅ Use of undefined variables (arguments, `{% set %}`, etc)
-* ✅ Calls with *too many* arguments (except if `varargs` is used)
-* ✅ Calls with *too few* arguments
+* ✅ Undefined variable used (arguments, `{% set %}`, etc)
+* ✅ Call with *too many* arguments (except if `varargs` is used)
+* ✅ Call with *too few* arguments
 * ✅ Required argument declared after optional
 * ⌛ Type mismatch in macro call
 
