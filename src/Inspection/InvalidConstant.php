@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Inspection;
 
@@ -36,10 +36,10 @@ class InvalidConstant implements NodeVisitorInterface
         $location = "$sourcePath:{$node->getTemplateLine()}";
 
         if (count($arguments) === 1) {
-            $error = $this->checkConstant($arguments->getNode(0));
+            $error = $this->checkConstant($arguments->getNode('0'));
         } else {
             if (count($arguments) === 2) {
-                $error = $this->checkConstantAndObject($arguments->getNode(0), $arguments->getNode(1));
+                $error = $this->checkConstantAndObject($arguments->getNode('0'), $arguments->getNode('1'));
             } else {
                 $error = 'too many arguments';
             }
@@ -58,7 +58,7 @@ class InvalidConstant implements NodeVisitorInterface
 
         $value = $node->getAttribute('value');
 
-        if (!defined($value)) {
+        if (!is_string($value) || !defined($value)) {
             return "invalid constant: '$value'";
         }
 
