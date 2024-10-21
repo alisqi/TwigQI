@@ -110,7 +110,7 @@ they are rendered. This is the aim of a similar project: [TwigStan](https://gith
 
 ## Typed variables
 * ✅ Declared types is invalid (e.g., `{% types {i: 'nit'} %}`)
-* ✅ Context does not contain non-optional variable
+* ✅ Runtime: non-optional variable is not defined
 * ✅ Runtime: non-nullable variable is null
 * ✅ Runtime: variable does not match type
 * ⌛ Invalid object property or method (e.g., `{{ user.nmae }}`)
