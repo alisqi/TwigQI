@@ -19,6 +19,8 @@ final class AssertedTypesNode extends Node
     {
         parent::compile($compiler); // compile the original TypesNode (which doesn't do anything)
 
+        $compiler->write('// type assertions' . PHP_EOL);
+
         foreach (
             $this->getNode('types')->getAttribute(
                 'mapping'
@@ -26,6 +28,8 @@ final class AssertedTypesNode extends Node
         ) {
             $this->compileTypeAssertions($compiler, $name, $type, $optional);
         }
+
+        $compiler->write('// end type assertions' . PHP_EOL);
     }
 
     private function compileTypeAssertions(Compiler $compiler, string $name, string $type, bool $optional): void
@@ -49,32 +53,37 @@ final class AssertedTypesNode extends Node
 
     public function assertVariableExists(Compiler $compiler, string $name): void
     {
-        $compiler->raw('if (!array_key_exists(')
+        $compiler->write('if (!array_key_exists(')
             ->string($name)
-            ->raw(', $context)) {')
+            ->raw(', $context)) {' . PHP_EOL)
             ->indent()
-            ->write('trigger_error("Non-optional variable \'$name\' is not set", E_USER_ERROR);')
+            ->write('trigger_error(sprintf("Non-optional variable \'%s\' is not set", ')
+            ->string($name)
+            ->raw('), E_USER_ERROR);' . PHP_EOL)
             ->outdent()
-            ->write('}');
+            ->write('}' . PHP_EOL);
     }
 
     public function assertVariableIsNotNull(Compiler $compiler, string $name): void
     {
-        $compiler->raw('if (array_key_exists(')
+        $compiler
+            ->write('if (array_key_exists(')
             ->string($name)
             ->raw(', $context) && is_null($context[')
             ->string($name)
-            ->raw('])) {')
+            ->raw('])) {' . PHP_EOL)
             ->indent()
-            ->write('trigger_error("Non-nullable variable \'$name\' is null", E_USER_ERROR);')
+            ->write('trigger_error(sprintf("Non-nullable variable \'%s\' is null", ')
+            ->string($name)
+            ->raw('), E_USER_ERROR);' . PHP_EOL)
             ->outdent()
-            ->write('}');
+            ->write('}' . PHP_EOL);
     }
 
     private function assertType(Compiler $compiler, string $name, string $type): void
     {
         $compiler
-            ->raw('if (($value = $context[')
+            ->write('if (($value = $context[')
             ->string($name)
             ->raw('] ?? null) !== null && !\AlisQI\TwigQI\Assertion\AssertType::matches($value, ')
             ->string($type)
@@ -82,9 +91,9 @@ final class AssertedTypesNode extends Node
             ->indent()
             ->write('trigger_error(sprintf("Type for variable \'%s\' does not match", ')
             ->string($name)
-            ->write('), E_USER_ERROR);' . PHP_EOL)
+            ->raw('), E_USER_ERROR);' . PHP_EOL)
             ->outdent()
             ->write('}' . PHP_EOL)
-            ->write('unset($value);');
+            ->write('unset($value);' . PHP_EOL);
     }
 }
