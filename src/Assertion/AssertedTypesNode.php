@@ -22,9 +22,8 @@ final class AssertedTypesNode extends Node
         $compiler->write('// type assertions' . PHP_EOL);
 
         foreach (
-            $this->getNode('types')->getAttribute(
-                'mapping'
-            ) as $name => ['type' => $type, 'optional' => $optional]
+            $this->getNode('types')->getAttribute('mapping')
+                as $name => ['type' => $type, 'optional' => $optional]
         ) {
             $this->compileTypeAssertions($compiler, $name, $type, $optional);
         }
