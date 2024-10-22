@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Inspection;
 
+use AlisQI\TwigQI\Helper\NodeLocation;
 use Twig\Environment;
 use Twig\Node\Expression\ConstantExpression;
 use Twig\Node\Expression\FunctionExpression;
@@ -33,9 +34,7 @@ class InvalidConstant implements NodeVisitorInterface
             return;
         }
 
-        $sourcePath = ($node->getSourceContext() ?? $node->getNode('node')->getSourceContext())?->getPath()
-            ?? 'unknown';
-        $location = "$sourcePath:{$node->getTemplateLine()}";
+        $location = new NodeLocation($node);
 
         if (count($arguments) === 1) {
             $error = $this->checkConstant($arguments->getNode('0'));

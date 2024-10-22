@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Inspection;
 
+use AlisQI\TwigQI\Helper\NodeLocation;
 use Twig\Environment;
 use Twig\Node\Node;
 use Twig\Node\TypesNode;
@@ -32,9 +33,7 @@ class ValidTypes implements NodeVisitorInterface
     public function enterNode(Node $node, Environment $env): Node
     {
         if ($node instanceof TypesNode) {
-            $sourcePath = ($node->getSourceContext() ?? $node->getNode('node')->getSourceContext())?->getPath()
-                ?? 'unknown';
-            $location = "$sourcePath:{$node->getTemplateLine()}";
+            $location = new NodeLocation($node);
 
             foreach ($node->getAttribute('mapping') as $name => ['type' => $type]) {
                 $this->validateType($name, $type, $location);
@@ -44,7 +43,7 @@ class ValidTypes implements NodeVisitorInterface
         return $node;
     }
 
-    private function validateType(string $name, string $type, string $location): void
+    private function validateType(string $name, string $type, NodeLocation $location): void
     {
         if ($type[0] === '?') {
             $type = substr($type, 1);

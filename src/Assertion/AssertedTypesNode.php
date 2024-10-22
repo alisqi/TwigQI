@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Assertion;
 
+use AlisQI\TwigQI\Helper\NodeLocation;
 use Twig\Attribute\YieldReady;
 use Twig\Compiler;
 use Twig\Node\Node;
@@ -12,9 +13,13 @@ use Twig\Node\TypesNode;
 #[YieldReady]
 final class AssertedTypesNode extends Node
 {
+    private readonly string $location;
+
     public function __construct(TypesNode $types)
     {
         parent::__construct(['types' => $types]);
+
+        $this->location = (new NodeLocation($types))->__toString();
     }
 
     public function compile(Compiler $compiler): void

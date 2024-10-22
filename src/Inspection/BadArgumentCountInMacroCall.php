@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Inspection;
 
+use AlisQI\TwigQI\Helper\NodeLocation;
 use Twig\Environment;
 use Twig\Node\Expression\MethodCallExpression;
 use Twig\Node\Expression\NameExpression;
@@ -20,10 +21,10 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
      * 
      * For example:
      * ```php
-     * ['marco' => [[1, 'tpl:1337']]];
+     * ['marco' => [[1, NodeLocation]]];
      * ```
      * 
-     * @var array<string, array<array{0: int, 1: string}>>
+     * @var array<string, array<array{0: int, 1: NodeLocation}>>
      */
     private array $macroCalls = [];
 
@@ -56,10 +57,8 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
         } elseif ($node instanceof MethodCallExpression) {
             // when visiting a function call, log call
             $macroName = substr($node->getAttribute('method'), strlen('macro_'));
-            
-            $sourcePath = ($node->getSourceContext() ?? $node->getNode('node')->getSourceContext())?->getPath()
-                ?? 'unknown';
-            $location = "$sourcePath:{$node->getTemplateLine()}";
+
+            $location = new NodeLocation($node);
             
             $argumentCount = count($node->getNode('arguments')->getKeyValuePairs());
 

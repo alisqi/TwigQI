@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Inspection;
 
+use AlisQI\TwigQI\Helper\NodeLocation;
 use Twig\Environment;
 use Twig\Node\Expression\MethodCallExpression;
 use Twig\Node\Expression\NameExpression;
@@ -16,9 +17,7 @@ class RequiredMacroArgumentAfterOptional implements NodeVisitorInterface
     public function enterNode(Node $node, Environment $env): Node
     {
         if ($node instanceof MacroNode) {
-            $sourcePath = ($node->getSourceContext() ?? $node->getNode('node')->getSourceContext())?->getPath()
-                ?? 'unknown';
-            $location = "$sourcePath:{$node->getTemplateLine()}";
+            $location = new NodeLocation($node);
 
             $macroName = $node->getAttribute('name');
 
