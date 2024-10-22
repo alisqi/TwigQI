@@ -4,6 +4,7 @@ namespace AlisQI\TwigQI\Tests;
 
 use ArrayIterator;
 use Exception;
+use Twig\Node\Node;
 
 class TypeAssertionsTest extends AbstractTestCase
 {
@@ -141,6 +142,15 @@ class TypeAssertionsTest extends AbstractTestCase
             ['iterable<iterable<iterable<string, number>>>', [[['foo' => 1337]]], true],
             ['iterable<iterable<iterable<string, number>>>', [[[13, 37]]], false],
             ['iterable<iterable<iterable<string, number>>>', [[['foo' => 'bar']]], false],
+
+            ['\\\\Exception', new Exception(), true],
+            ['\\\\Exception', new Node(), false],
+            ['iterable<string, \\\\Twig\\\\Node\\\\Node>', ['node' => new Node()], true],
+            ['iterable<string, \\\\Twig\\\\Node\\\\Node[]>', ['nodes' => [new Node(), new Node()]], true],
+            ['iterable<string, \\\\Twig\\\\Node\\\\Node>', ['node' => new Exception()], false],
+
+            ['\\\\Traversable', new Node(), true],
+            ['\\\\Traversable', true, false],
         ];
     }
 

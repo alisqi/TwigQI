@@ -11,11 +11,17 @@ final class AssertType
             $type = 'iterable<' . substr($type, 0, -2) . '>';
         }
 
+        // assert iterables with key and/or value type recursively
         if (str_starts_with($type, 'iterable<')) {
             $matches = [];
             preg_match('/<((string|number),\s*)?(.+)>/', substr($type, 8), $matches);
             [, , $keyType, $valueType] = $matches;
             return self::iterableMatches($value, $valueType, $keyType ?: null);
+        }
+
+        // assert class or interface names
+        if (str_starts_with($type, '\\')) {
+            return $value instanceof $type;
         }
 
         return match ($type) {
