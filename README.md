@@ -85,7 +85,7 @@ Your preferences and/or requirements may very well differ.
 
 Here's the list of types supported by TwigQI:
 * Scalar: `string`, `number`, `boolean`, `null`, `object` (although a class is preferred)
-* Class names (FQN, with a starting backslash. Note that backslashes must be escaped in Twig strings!)
+* Classes, interfaces and traits (FQN, with a starting backslash. Note that backslashes must be escaped in Twig strings!)
 * Three types of iterables, with increasing specificity
   * `iterable` declares nothing more or less than that the variable is iterable
   * `iterable<ValueType>` declares the values' type
