@@ -8,6 +8,8 @@ use AlisQI\TwigQI\Helper\NodeLocation;
 use AlisQI\TwigQI\Helper\VariableTypeCollector;
 use Twig\Environment;
 use Twig\Node\Expression\GetAttrExpression;
+use Twig\Node\Expression\NameExpression;
+use Twig\Node\ModuleNode;
 use Twig\Node\Node;
 use Twig\Node\TypesNode;
 use Twig\NodeVisitor\NodeVisitorInterface;
@@ -21,7 +23,7 @@ class InvalidDotOperation implements NodeVisitorInterface
         'boolean',
     ];
 
-    private readonly VariableTypeCollector $variableTypeCollector;
+    private VariableTypeCollector $variableTypeCollector;
 
     public function __construct()
     {
@@ -30,16 +32,22 @@ class InvalidDotOperation implements NodeVisitorInterface
 
     public function enterNode(Node $node, Environment $env): Node
     {
+        // reset state between templates
+        if ($node instanceof ModuleNode) {
+            $this->variableTypeCollector = new VariableTypeCollector();
+        }
+
         if ($node instanceof TypesNode) {
             $this->variableTypeCollector->add($node);
         }
 
         if (
             $node instanceof GetAttrExpression &&
-            $node->getAttribute('type') !== Template::ARRAY_CALL
+            $node->getAttribute('type') !== Template::ARRAY_CALL &&
+            ($nameNode = $node->getNode('node')) instanceof NameExpression
         ) {
             $location = new NodeLocation($node);
-            $name = $node->getNode('node')->getAttribute('name');
+            $name = $nameNode->getAttribute('name');
             $attribute = $node->getNode('attribute')->getAttribute('value');
             $this->checkOperation($name, $attribute, $location);
         }
