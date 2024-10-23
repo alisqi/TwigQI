@@ -9,6 +9,7 @@
         <testsuite name="Project Test Suite">
             <directory suffix=".php">./tests</directory>
             <exclude>./tests/AbstractTestCase.php</exclude>
+            <exclude>./tests/Type/Dummy.php</exclude>
         </testsuite>
     </testsuites>
 
