@@ -248,4 +248,19 @@ class InvalidDotOperationTest extends AbstractTestCase
             "Error should not trigger when using attribute shorthand for type '$type' and attribute '$attribute'"
         );
     }
+
+    public function test_itSupportsDynamicObjectProperties(): void
+    {
+        $this->env->createTemplate(
+            <<<EOF
+            {% types {foo: '\\\\AlisQI\\\\TwigQI\\\\Tests\\\\Type\\\\Dummy'} %}
+            {{ foo.dynProp }}
+        EOF
+        );
+
+        self::assertEmpty(
+            $this->errors,
+            "Error should not trigger when accessing dynamic object property"
+        );
+    }
 }

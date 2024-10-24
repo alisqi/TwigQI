@@ -6,6 +6,7 @@ namespace AlisQI\TwigQI\Inspection;
 
 use AlisQI\TwigQI\Helper\NodeLocation;
 use AlisQI\TwigQI\Helper\VariableTypeCollector;
+use phpDocumentor\Reflection\DocBlockFactory;
 use ReflectionClass;
 use Twig\Environment;
 use Twig\Node\Expression\GetAttrExpression;
@@ -93,6 +94,7 @@ class InvalidDotOperation implements NodeVisitorInterface
 
         $rc = new ReflectionClass($type); // ValidTypes already ensure the type is, well, valid.
 
+        // property
         if (
             $rc->hasProperty($attribute) &&
             $rc->getProperty($attribute)->isPublic()
@@ -100,6 +102,14 @@ class InvalidDotOperation implements NodeVisitorInterface
             return;
         }
 
+        // dynamic property
+        foreach (DocBlockFactory::createInstance()->create($rc)->getTagsWithTypeByName('property') as $tag) {
+            if ($attribute === $tag->getVariableName()) {
+                return;
+            }
+        }
+
+        // method (incl. getX, isX hasX short hand forms)
         $ucFirstAttr = ucfirst($attribute);
         foreach (
             [$attribute, "get$ucFirstAttr", "is$ucFirstAttr", "has$ucFirstAttr"]
