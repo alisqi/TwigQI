@@ -103,9 +103,11 @@ class InvalidDotOperation implements NodeVisitorInterface
         }
 
         // dynamic property
-        foreach (DocBlockFactory::createInstance()->create($rc)->getTagsWithTypeByName('property') as $tag) {
-            if ($attribute === $tag->getVariableName()) {
-                return;
+        if ($rc->getDocComment() !== false) {
+            foreach (DocBlockFactory::createInstance()->create($rc)->getTagsWithTypeByName('property') as $tag) {
+                if ($attribute === $tag->getVariableName()) {
+                    return;
+                }
             }
         }
 
