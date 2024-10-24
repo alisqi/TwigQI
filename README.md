@@ -2,25 +2,27 @@
 
 [![License](https://img.shields.io/github/license/alisqi/TwigQI.svg)](https://github.com/alisqi/TwigQI/blob/main/LICENSE)
 [![PHP Version](https://img.shields.io/badge/php-%3E%3D%208.1-8892BF.svg)](https://php.net)
+![Stability](https://img.shields.io/badge/stability-stable-brightgreen)
 [![Build Status](https://github.com/alisqi/TwigQI/actions/workflows/test.yml/badge.svg)](https://github.com/alisqi/TwigQI/actions)
 [![codecov](https://codecov.io/gh/alisqi/TwigQI/graph/badge.svg?token=G3AE3RE4K0)](https://codecov.io/gh/alisqi/TwigQI)
 
 Twig Quality Inspections is an extension to the [Twig templating](https://github.com/twigphp/Twig) engine
-which adds static analysis (i.e., compile-time) and runtime assertions to increase templates' quality.
+which adds static analysis (i.e., compile-time) inspections and runtime assertions to increase templates' quality.
+See the [inspections section](#Inspections) below for details.
 
 Unlike other projects like [curlylint](https://www.curlylint.org/) and [djLint](https://www.djlint.com/docs/linter/),
 which focus on HTML, this tool exclusively analyzes the Twig code.
-
-While the Twig compiler will throw `SyntaxError`s, there are few other compile-time or runtime checks. For example,
-a `RuntimeError` is thrown when trying to use an undeclared variables (if `strict_variables` is enabled).
-However, this only happens if the code is actually executed. In the logic is non-trivial, neither developer nor tests
-(if any even exist) might detect obvious mistakes such as a misspelled variable name.
 
 The two intended use cases are:
 * Add the extension to the `Twig\Environment` during development
 * Invoke a CLI command in CI and/or pre-commit hook which compiles all templates with the extension enabled.
 
-This won't solve every single edge case or possibility, plus it's opinionated. You've been warned! ;p
+> [!NOTE]
+> TwigQI is stable and should work in most codebases due to its simplicity. I would love to hear about your experience
+> using it. Please create an issue or a pull request if you've found an issue. 🙏
+
+Note that TwigQI doesn't support every single edge case, plus it is a little opinionated. You've been warned! 😉
+(I do plan to make the extension configurable such that users can configure which inspections to use, or add custom ones.)
 
 # Justification
 Just in case you need convincing, please consider the following example:
@@ -52,10 +54,20 @@ However, `user.getRoleLabel(usr.role)` will cause an uncaught `TypeError` if tha
 since Twig will call that method with `null`. Instead of just having a buggy badge, *the whole page breaks*.
 
 # Usage
-Add the extension to your `Twig\Environment`.
+First, install using
+```bash
+composer require --dev alisqi/twigqi:dev-main
+```
+
+Next, add the extension to your `Twig\Environment`:
+```php
+$twig->addExtension(new AlisQI\TwigQI\Extension());
+```
 
 Any issues will be reported using PHP's `trigger_error` with `E_USER_*` levels.
 Set up your app and/or CI build to report these as you see fit.
+
+And that's it! 😎
 
 # Design
 The current design uses `NodeVisitor` classes for every inspection. That allows for easy testing and configurability.
@@ -85,7 +97,9 @@ Your preferences and/or requirements may very well differ.
 
 Here's the list of types supported by TwigQI:
 * Scalar: `string`, `number`, `boolean`, `null`, `object` (although a class is preferred)
-* Classes, interfaces and traits (FQN, with a starting backslash. Note that backslashes must be escaped in Twig strings!)
+* Classes, interfaces and traits
+
+  Use FQNs with a starting backslash. Note that backslashes must be escaped in Twig strings [until v4](https://github.com/twigphp/Twig/pull/4199).
 * Three types of iterables, with increasing specificity
   * `iterable` declares nothing more or less than that the variable is iterable
   * `iterable<ValueType>` declares the values' type
@@ -115,10 +129,9 @@ they are rendered. This is the aim of a similar project: [TwigStan](https://gith
 * ✅ Runtime: variable does not match type
 * ⌛ Invalid object property or method (e.g., `{{ user.nmae }}`)
 * ⌛ Undocumented context variable (i.e., missing in `{% types %}`)
-* ⌛ Use of short-hand form (e.g., `{{ user.admin }}` instead of `isAdmin`) [Notice]
+* ⌛ Use of short-hand form (e.g., `{{ user.admin }}` instead of `isAdmin`)
 
   Rationale: makes it hard to find usage of properties/methods
-* Non-stringable variable in string interpolation
 
 ## Constants
 * ✅ Invalid constant (e.g., `constant('BAD')`)
