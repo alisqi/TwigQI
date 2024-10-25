@@ -127,7 +127,9 @@ they are rendered. This is the aim of a similar project: [TwigStan](https://gith
 * ✅ Runtime: non-optional variable is not defined
 * ✅ Runtime: non-nullable variable is null
 * ✅ Runtime: variable does not match type
-* ⌛ Invalid object property or method (e.g., `{{ user.nmae }}`)
+* ✅ Invalid object property or method (e.g., `{{ user.nmae }}`)
+
+  ⚠️ This inspection _can_ trigger false positives, depending on your template logic.
 * ⌛ Undocumented context variable (i.e., missing in `{% types %}`)
 * ⌛ Use of short-hand form (e.g., `{{ user.admin }}` instead of `isAdmin`)
 
