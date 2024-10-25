@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Tests\Type;
 
+/**
+ * @property bool $dynProp
+ */
 class Dummy
 {
     public string $pubProp;

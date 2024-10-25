@@ -6,14 +6,27 @@ use Twig\Node\TypesNode;
 
 class VariableTypeCollector
 {
-    /** @var array<string, string> */
+    /** @var array<string, list<string>> */
     private array $variableTypes = [];
 
     public function add(TypesNode $node): void
     {
         foreach ($node->getAttribute('mapping') as $name => ['type' => $type]) {
-            $this->variableTypes[$name] = $type;
+            $this->variableTypes[$name] = [$type];
         }
+    }
+
+    public function push(string $variableName, string $type): void
+    {
+        if (!array_key_exists($variableName, $this->variableTypes)) {
+            $this->variableTypes[$variableName] = [];
+        }
+        $this->variableTypes[$variableName][] = $type;
+    }
+
+    public function pop(string $variableName): ?string
+    {
+        return array_pop($this->variableTypes[$variableName]);
     }
 
     /** list<string> */
@@ -29,7 +42,10 @@ class VariableTypeCollector
 
     public function getDeclaredType(string $variableName): ?string
     {
-        return $this->variableTypes[$variableName]
-            ?? throw new \InvalidArgumentException(sprintf('Variable "%s" is not declared.', $variableName));
+        if (!$this->isDeclared($variableName)) {
+            return null;
+        }
+
+        return end($this->variableTypes[$variableName]);
     }
 }

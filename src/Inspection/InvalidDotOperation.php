@@ -6,9 +6,15 @@ namespace AlisQI\TwigQI\Inspection;
 
 use AlisQI\TwigQI\Helper\NodeLocation;
 use AlisQI\TwigQI\Helper\VariableTypeCollector;
+use phpDocumentor\Reflection\DocBlockFactory;
+use ReflectionClass;
 use Twig\Environment;
+use Twig\Node\Expression\ArrowFunctionExpression;
+use Twig\Node\Expression\FunctionExpression;
 use Twig\Node\Expression\GetAttrExpression;
 use Twig\Node\Expression\NameExpression;
+use Twig\Node\ForNode;
+use Twig\Node\MacroNode;
 use Twig\Node\ModuleNode;
 use Twig\Node\Node;
 use Twig\Node\TypesNode;
@@ -23,22 +29,44 @@ class InvalidDotOperation implements NodeVisitorInterface
         'boolean',
     ];
 
-    private VariableTypeCollector $variableTypeCollector;
+    private VariableTypeCollector $globalVariableTypeCollector;
+    private ?VariableTypeCollector $scopedVariableTypeCollector = null;
 
     public function __construct()
     {
-        $this->variableTypeCollector = new VariableTypeCollector();
+        $this->globalVariableTypeCollector = new VariableTypeCollector();
+    }
+
+    private function getCurrentVariableTypeCollector(): VariableTypeCollector
+    {
+        return $this->scopedVariableTypeCollector
+            ?? $this->globalVariableTypeCollector;
     }
 
     public function enterNode(Node $node, Environment $env): Node
     {
         // reset state between templates
         if ($node instanceof ModuleNode) {
-            $this->variableTypeCollector = new VariableTypeCollector();
+            $this->globalVariableTypeCollector = new VariableTypeCollector();
+            $this->scopedVariableTypeCollector = null;
+        }
+
+        if ($node instanceof MacroNode) {
+            $this->scopedVariableTypeCollector = new VariableTypeCollector();
+            // Note: we don't have to unset this collector because the Twig\NodeTraverser always visits macros _last_
         }
 
         if ($node instanceof TypesNode) {
-            $this->variableTypeCollector->add($node);
+            $this->getCurrentVariableTypeCollector()->add($node);
+        }
+
+        if (
+            $node instanceof ArrowFunctionExpression ||
+            $node instanceof ForNode
+        ) {
+            foreach ($this->extractScopedVariableNames($node) as $name) {
+                $this->getCurrentVariableTypeCollector()->push($name, 'mixed');
+            }
         }
 
         if (
@@ -57,11 +85,13 @@ class InvalidDotOperation implements NodeVisitorInterface
 
     private function checkOperation(string $name, string $attribute, NodeLocation $location): void
     {
-        if (!$this->variableTypeCollector->isDeclared($name)) {
+        $variableTypeCollector = $this->getCurrentVariableTypeCollector();
+
+        if (!$variableTypeCollector->isDeclared($name)) {
             return;
         }
 
-        $type = $this->variableTypeCollector->getDeclaredType($name);
+        $type = $variableTypeCollector->getDeclaredType($name);
 
         if (in_array($type, self::UNSUPPORTED_TYPES)) {
             trigger_error(
@@ -69,16 +99,91 @@ class InvalidDotOperation implements NodeVisitorInterface
                 E_USER_ERROR
             );
         }
+
+        if (!str_starts_with($type, '\\')) {
+            return;
+        }
+
+        $rc = new ReflectionClass($type); // ValidTypes already ensure the type is, well, valid.
+
+        // property
+        if (
+            $rc->hasProperty($attribute) &&
+            $rc->getProperty($attribute)->isPublic()
+        ) {
+            return;
+        }
+
+        // dynamic property
+        if (false !== $docBlock = $rc->getDocComment()) {
+            foreach (DocBlockFactory::createInstance()->create($docBlock)->getTagsWithTypeByName('property') as $tag) {
+                if ($attribute === $tag->getVariableName()) {
+                    return;
+                }
+            }
+        }
+
+        // method (incl. getX, isX hasX short hand forms)
+        $ucFirstAttr = ucfirst($attribute);
+        foreach (
+            [$attribute, "get$ucFirstAttr", "is$ucFirstAttr", "has$ucFirstAttr"]
+            as $potentialMethod
+        ) {
+            if (!$rc->hasMethod($potentialMethod)) {
+                continue;
+            }
+
+            if ($rc->getMethod($potentialMethod)->isPublic()) {
+                return;
+            }
+            break; // don't try other potential methods
+        }
+
+        trigger_error(
+            "Invalid attribute '$attribute' for type '$type' (at $location)'",
+            E_USER_ERROR
+        );
     }
 
     public function leaveNode(Node $node, Environment $env): ?Node
     {
+        if (
+            $node instanceof ArrowFunctionExpression ||
+            $node instanceof ForNode
+        ) {
+            foreach ($this->extractScopedVariableNames($node) as $name) {
+                $this->getCurrentVariableTypeCollector()->pop($name);
+            }
+        }
+
         return $node;
+    }
+
+    /** @return list<string> */
+    private function extractScopedVariableNames(ArrowFunctionExpression|ForNode $node): array
+    {
+        if ($node instanceof ArrowFunctionExpression) {
+            $names = $node->getNode('names');
+
+            $variables = [$names->getNode('0')->getAttribute('name')];
+            if ($names->hasNode('1')) {
+                $variables[] = $names->getNode('1')->getAttribute('name');
+            }
+            return $variables;
+        }
+
+        if ($node instanceof ForNode) {
+            return [
+                $node->getNode('key_target')->getAttribute('name'),
+                $node->getNode('value_target')->getAttribute('name'),
+            ];
+        }
     }
 
     public function getPriority(): int
     {
         return 0;
     }
+
 
 }
