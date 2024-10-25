@@ -9,8 +9,11 @@ use AlisQI\TwigQI\Helper\VariableTypeCollector;
 use phpDocumentor\Reflection\DocBlockFactory;
 use ReflectionClass;
 use Twig\Environment;
+use Twig\Node\Expression\ArrowFunctionExpression;
+use Twig\Node\Expression\FunctionExpression;
 use Twig\Node\Expression\GetAttrExpression;
 use Twig\Node\Expression\NameExpression;
+use Twig\Node\ForNode;
 use Twig\Node\MacroNode;
 use Twig\Node\ModuleNode;
 use Twig\Node\Node;
@@ -55,6 +58,15 @@ class InvalidDotOperation implements NodeVisitorInterface
 
         if ($node instanceof TypesNode) {
             $this->getCurrentVariableTypeCollector()->add($node);
+        }
+
+        if (
+            $node instanceof ArrowFunctionExpression ||
+            $node instanceof ForNode
+        ) {
+            foreach ($this->extractScopedVariableNames($node) as $name) {
+                $this->getCurrentVariableTypeCollector()->push($name, 'mixed');
+            }
         }
 
         if (
@@ -135,11 +147,43 @@ class InvalidDotOperation implements NodeVisitorInterface
 
     public function leaveNode(Node $node, Environment $env): ?Node
     {
+        if (
+            $node instanceof ArrowFunctionExpression ||
+            $node instanceof ForNode
+        ) {
+            foreach ($this->extractScopedVariableNames($node) as $name) {
+                $this->getCurrentVariableTypeCollector()->pop($name);
+            }
+        }
+
         return $node;
+    }
+
+    /** @return list<string> */
+    private function extractScopedVariableNames(ArrowFunctionExpression|ForNode $node): array
+    {
+        if ($node instanceof ArrowFunctionExpression) {
+            $names = $node->getNode('names');
+
+            $variables = [$names->getNode('0')->getAttribute('name')];
+            if ($names->hasNode('1')) {
+                $variables[] = $names->getNode('1')->getAttribute('name');
+            }
+            return $variables;
+        }
+
+        if ($node instanceof ForNode) {
+            return [
+                $node->getNode('key_target')->getAttribute('name'),
+                $node->getNode('value_target')->getAttribute('name'),
+            ];
+        }
     }
 
     public function getPriority(): int
     {
         return 0;
     }
+
+
 }

@@ -263,4 +263,34 @@ class InvalidDotOperationTest extends AbstractTestCase
             "Error should not trigger when accessing dynamic object property"
         );
     }
+
+    public static function getTwigContentWithVariableOverloads(): array
+    {
+        return [
+            ['{{ []|filter((foo, k) => foo.bar) }}', true],
+            ['{{ []|filter((v, foo) => foo.bar) }}', true],
+            ['{% for k, foo in [] %}{{ foo.bar }}{% endfor %}', true],
+            ['{% for foo, v in [] %}{{ foo.bar }}{% endfor %}', true],
+
+            ['{{ []|filter((foo) => foo.bar) }} {{ foo.baz }}', false],
+            ['{% for foo in [] %}{{ foo.bar }}{% endfor %} {{ foo.baz }}', false],
+        ];
+    }
+
+    /** @dataProvider getTwigContentWithVariableOverloads */
+    public function test_itSupportsNameOverloading(string $content, bool $isValid): void
+    {
+        $this->env->createTemplate(
+            <<<EOF
+            {% types {foo: '\\\\Exception'} %}
+            $content
+        EOF
+        );
+
+        self::assertEquals(
+            $isValid,
+            empty($this->errors),
+            implode(', ', $this->errors)
+        );
+    }
 }
