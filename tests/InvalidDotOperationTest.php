@@ -271,6 +271,8 @@ class InvalidDotOperationTest extends AbstractTestCase
             ['{{ []|filter((v, foo) => foo.bar) }}', true],
             ['{% for k, foo in [] %}{{ foo.bar }}{% endfor %}', true],
             ['{% for foo, v in [] %}{{ foo.bar }}{% endfor %}', true],
+            ['{% set foo = 1 %}{{ foo.bar }}', true],
+            ['{% set foo, bar = 1, 1 %}{{ foo.bar }}', true],
 
             ['{{ []|filter((foo) => foo.bar) }} {{ foo.baz }}', false],
             ['{% for foo in [] %}{{ foo.bar }}{% endfor %} {{ foo.baz }}', false],

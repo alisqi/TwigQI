@@ -17,6 +17,7 @@ use Twig\Node\ForNode;
 use Twig\Node\MacroNode;
 use Twig\Node\ModuleNode;
 use Twig\Node\Node;
+use Twig\Node\SetNode;
 use Twig\Node\TypesNode;
 use Twig\NodeVisitor\NodeVisitorInterface;
 use Twig\Template;
@@ -62,7 +63,8 @@ class InvalidDotOperation implements NodeVisitorInterface
 
         if (
             $node instanceof ArrowFunctionExpression ||
-            $node instanceof ForNode
+            $node instanceof ForNode ||
+            $node instanceof SetNode
         ) {
             foreach ($this->extractScopedVariableNames($node) as $name) {
                 $this->getCurrentVariableTypeCollector()->push($name, 'mixed');
@@ -160,9 +162,12 @@ class InvalidDotOperation implements NodeVisitorInterface
     }
 
     /** @return list<string> */
-    private function extractScopedVariableNames(ArrowFunctionExpression|ForNode $node): array
+    private function extractScopedVariableNames(ArrowFunctionExpression|ForNode|SetNode $node): array
     {
-        if ($node instanceof ArrowFunctionExpression) {
+        if (
+            $node instanceof ArrowFunctionExpression ||
+            $node instanceof SetNode
+        ) {
             $names = $node->getNode('names');
 
             $variables = [$names->getNode('0')->getAttribute('name')];
