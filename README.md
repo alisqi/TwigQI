@@ -130,10 +130,7 @@ they are rendered. This is the aim of a similar project: [TwigStan](https://gith
 * ✅ Invalid object property or method (e.g., `{{ user.nmae }}`)
 
   ⚠️ This inspection _can_ trigger false positives, depending on your template logic.
-* ⌛ Undocumented context variable (i.e., missing in `{% types %}`)
-* ⌛ Use of short-hand form (e.g., `{{ user.admin }}` instead of `isAdmin`)
-
-  Rationale: makes it hard to find usage of properties/methods
+* ⌛ Undeclared variable (i.e., missing in `types`, `set`, etc)
 
 ## Constants
 * ✅ Invalid constant (e.g., `constant('BAD')`)
