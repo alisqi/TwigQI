@@ -295,4 +295,20 @@ class InvalidDotOperationTest extends AbstractTestCase
             implode(', ', $this->errors)
         );
     }
+
+    public function test_applyTagDoesNotBreak(): void
+    {
+        $this->env->createTemplate(
+            <<<EOF
+            {% apply upper %}
+                {{ foo.bar }}
+            {% endapply %}
+        EOF
+        );
+
+        self::assertEmpty(
+            $this->errors,
+            "Error should not trigger when accessing dynamic object property"
+        );
+    }
 }

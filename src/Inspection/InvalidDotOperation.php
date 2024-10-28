@@ -170,6 +170,10 @@ class InvalidDotOperation implements NodeVisitorInterface
         ) {
             $names = $node->getNode('names');
 
+            if (!$names->hasNode('0')) { // skip {% apply %} (see ApplyTokenParser)
+                return [];
+            }
+
             $variables = [$names->getNode('0')->getAttribute('name')];
             if ($names->hasNode('1')) {
                 $variables[] = $names->getNode('1')->getAttribute('name');
