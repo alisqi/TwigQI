@@ -10,7 +10,7 @@ use AlisQI\TwigQI\Inspection\InvalidConstant;
 use AlisQI\TwigQI\Inspection\InvalidDotOperation;
 use AlisQI\TwigQI\Inspection\RequiredMacroArgumentAfterOptional;
 use AlisQI\TwigQI\Inspection\UndeclaredVariableInMacro;
-use AlisQI\TwigQI\Inspection\ValidTypes;
+use AlisQI\TwigQI\Inspection\InvalidTypes;
 use Twig\Extension\AbstractExtension;
 
 class Extension extends AbstractExtension
@@ -18,7 +18,7 @@ class Extension extends AbstractExtension
     public function getNodeVisitors(): array
     {
         return [
-            new ValidTypes(),
+            new InvalidTypes(),
             new InvalidDotOperation(),
             new WrapTypesInAssertedTypes(),
 

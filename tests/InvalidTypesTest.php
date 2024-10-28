@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Tests;
 
-class ValidTypesTest extends AbstractTestCase
+class InvalidTypesTest extends AbstractTestCase
 {
     public static function getTypes(): array
     {

@@ -10,7 +10,7 @@ use Twig\Node\Node;
 use Twig\Node\TypesNode;
 use Twig\NodeVisitor\NodeVisitorInterface;
 
-class ValidTypes implements NodeVisitorInterface
+class InvalidTypes implements NodeVisitorInterface
 {
     private const BASIC_TYPES = [
         'string',
