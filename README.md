@@ -22,7 +22,7 @@ The two intended use cases are:
 > using it. Please create an issue or a pull request if you've found an issue. 🙏
 
 Note that TwigQI doesn't support every single edge case, plus it is a little opinionated. You've been warned! 😉
-(I do plan to make the extension configurable such that users can configure which inspections to use, or add custom ones.)
+The good news is that you can easily create a bespoke suite by cherry-picking the inspections.
 
 # Justification
 Just in case you need convincing, please consider the following example:

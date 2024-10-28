@@ -18,13 +18,15 @@ class Extension extends AbstractExtension
     public function getNodeVisitors(): array
     {
         return [
-            new BadArgumentCountInMacroCall(),
-            new InvalidConstant(),
-            new RequiredMacroArgumentAfterOptional(),
-            new UndeclaredVariableInMacro(),
             new ValidTypes(),
             new InvalidDotOperation(),
             new WrapTypesInAssertedTypes(),
+
+            new InvalidConstant(),
+
+            new BadArgumentCountInMacroCall(),
+            new RequiredMacroArgumentAfterOptional(),
+            new UndeclaredVariableInMacro(),
         ];
     }
 }
