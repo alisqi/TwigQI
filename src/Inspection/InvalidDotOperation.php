@@ -11,7 +11,7 @@ use ReflectionClass;
 use Twig\Environment;
 use Twig\Node\Expression\ArrowFunctionExpression;
 use Twig\Node\Expression\GetAttrExpression;
-use Twig\Node\Expression\NameExpression;
+use Twig\Node\Expression\Variable\ContextVariable;
 use Twig\Node\ForNode;
 use Twig\Node\MacroNode;
 use Twig\Node\ModuleNode;
@@ -73,7 +73,7 @@ class InvalidDotOperation implements NodeVisitorInterface
         if (
             $node instanceof GetAttrExpression &&
             $node->getAttribute('type') !== Template::ARRAY_CALL &&
-            ($nameNode = $node->getNode('node')) instanceof NameExpression
+            ($nameNode = $node->getNode('node')) instanceof ContextVariable
         ) {
             $location = new NodeLocation($node);
             $name = $nameNode->getAttribute('name');
@@ -188,7 +188,7 @@ class InvalidDotOperation implements NodeVisitorInterface
 
             $keyType = $valueType = 'mixed';
 
-            if (($seqNode = $node->getNode('seq')) instanceof NameExpression) {
+            if (($seqNode = $node->getNode('seq')) instanceof ContextVariable) {
                 $seqName = $seqNode->getAttribute('name');
 
                 if ((null !== $seqType = $this->getCurrentVariableTypeCollector()->getDeclaredType($seqName))) {

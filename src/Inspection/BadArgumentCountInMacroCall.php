@@ -7,7 +7,7 @@ namespace AlisQI\TwigQI\Inspection;
 use AlisQI\TwigQI\Helper\NodeLocation;
 use Twig\Environment;
 use Twig\Node\Expression\MacroReferenceExpression;
-use Twig\Node\Expression\NameExpression;
+use Twig\Node\Expression\Variable\ContextVariable;
 use Twig\Node\MacroNode;
 use Twig\Node\Node;
 use Twig\NodeVisitor\NodeVisitorInterface;
@@ -47,8 +47,8 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
                 ];
             }
 
-            // add 'varargs' to signature if it's used anywhere (i.e., there's a NameExpression that uses it)
-            if ($this->hasVarArgsNameExpressionDescendant($node)) {
+            // add 'varargs' to signature if it's used anywhere (i.e., there's a ContextVariable that uses it)
+            if ($this->hasVarArgsContextVariableDescendant($node)) {
                 $signature[] = ['name' => MacroNode::VARARGS_NAME, 'required' => false];
             }
 
@@ -114,16 +114,16 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
         return 0;
     }
 
-    private function hasVarArgsNameExpressionDescendant(Node $node): bool {
+    private function hasVarArgsContextVariableDescendant(Node $node): bool {
         if (
-            $node instanceof NameExpression &&
+            $node instanceof ContextVariable &&
             $node->getAttribute('name') === MacroNode::VARARGS_NAME
         ) {
             return true;
         }
     
         foreach ($node as $childNode) {
-            if ($this->hasVarArgsNameExpressionDescendant($childNode)) {
+            if ($this->hasVarArgsContextVariableDescendant($childNode)) {
                 return true;
             }
         }

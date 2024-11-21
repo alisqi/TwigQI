@@ -6,7 +6,7 @@ namespace AlisQI\TwigQI\Inspection;
 
 use Twig\Environment;
 use Twig\Node\Expression\ArrowFunctionExpression;
-use Twig\Node\Expression\NameExpression;
+use Twig\Node\Expression\Variable\ContextVariable;
 use Twig\Node\ForNode;
 use Twig\Node\MacroNode;
 use Twig\Node\Node;
@@ -44,7 +44,7 @@ class UndeclaredVariableInMacro implements NodeVisitorInterface
         
         if (
             $this->currentMacro &&
-            $node instanceof NameExpression
+            $node instanceof ContextVariable
         ) {
             $this->checkVariableIsDeclared($node);
         }
@@ -102,7 +102,7 @@ class UndeclaredVariableInMacro implements NodeVisitorInterface
         return $variables;
     }
 
-    private function checkVariableIsDeclared(NameExpression $node): void
+    private function checkVariableIsDeclared(ContextVariable $node): void
     {
         $variableName = $node->getAttribute('name');
 

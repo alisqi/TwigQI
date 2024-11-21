@@ -8,7 +8,7 @@ use AlisQI\TwigQI\Helper\NodeLocation;
 use Twig\Environment;
 use Twig\Node\Expression\ConstantExpression;
 use Twig\Node\Expression\FunctionExpression;
-use Twig\Node\Expression\NameExpression;
+use Twig\Node\Expression\Variable\ContextVariable;
 use Twig\Node\Node;
 use Twig\NodeVisitor\NodeVisitorInterface;
 
@@ -75,7 +75,7 @@ class InvalidConstant implements NodeVisitorInterface
             return 'first argument must be string';
         }
 
-        if (!$name instanceof NameExpression) {
+        if (!$name instanceof ContextVariable) {
             return 'second argument must be a variable name';
         }
 
