@@ -8,7 +8,7 @@
             "name": "Jeroen Versteeg"
         }
     ],
-    "version": "1.0.2",
+    "version": "1.0.3",
     "autoload": {
         "psr-4": {
             "AlisQI\\TwigQI\\": "src/"
@@ -21,7 +21,7 @@
     },
     "require": {
         "php": "^8.1",
-        "twig/twig": "^3.13",
+        "twig/twig": ">=3.13,<3.15",
         "phpdocumentor/reflection-docblock": "^5.4"
     },
     "require-dev": {
