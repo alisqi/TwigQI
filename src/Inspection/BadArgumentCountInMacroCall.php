@@ -6,7 +6,7 @@ namespace AlisQI\TwigQI\Inspection;
 
 use AlisQI\TwigQI\Helper\NodeLocation;
 use Twig\Environment;
-use Twig\Node\Expression\MethodCallExpression;
+use Twig\Node\Expression\MacroReferenceExpression;
 use Twig\Node\Expression\NameExpression;
 use Twig\Node\MacroNode;
 use Twig\Node\Node;
@@ -39,7 +39,8 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
             $macroName = $node->getAttribute('name');
 
             $signature = [];
-            foreach ($node->getNode('arguments') as $name => $default) {
+            foreach ($node->getNode('arguments')->getKeyValuePairs() as ['key' => $key, 'value' => $default]) {
+                $name = $key->getAttribute('name');
                 $signature[] = [
                     'name'     => $name,
                     'required' => $default->hasAttribute('is_implicit') // if attr is set, it's always true
@@ -54,9 +55,9 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
             $this->checkCalls($macroName, $signature);
             
             unset($this->macroCalls[$macroName]); // remove logged calls to prevent collisions (macro with identical name in another template)
-        } elseif ($node instanceof MethodCallExpression) {
+        } elseif ($node instanceof MacroReferenceExpression) {
             // when visiting a function call, log call
-            $macroName = substr($node->getAttribute('method'), strlen('macro_'));
+            $macroName = substr($node->getAttribute('name'), strlen('macro_'));
 
             $location = new NodeLocation($node);
             

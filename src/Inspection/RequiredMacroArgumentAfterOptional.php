@@ -22,7 +22,8 @@ class RequiredMacroArgumentAfterOptional implements NodeVisitorInterface
             $macroName = $node->getAttribute('name');
 
             $previousArgumentIsRequired = null;
-            foreach ($node->getNode('arguments') as $name => $default) {
+            foreach ($node->getNode('arguments')->getKeyValuePairs() as ['key' => $key, 'value' => $default]) {
+                $name = $key->getAttribute('name');
                 $currentArgumentIsRequired = $default->hasAttribute('is_implicit'); // if attr is set, it's always true
 
                 if ($currentArgumentIsRequired && $previousArgumentIsRequired === false) {

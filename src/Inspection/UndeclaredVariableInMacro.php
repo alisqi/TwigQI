@@ -81,8 +81,8 @@ class UndeclaredVariableInMacro implements NodeVisitorInterface
         
         // Strategy pattern would be overkill here (for now, at least)
         if ($node instanceof MacroNode) {
-            foreach ($node->getNode('arguments') as $name => $default) {
-                $variables[] = $name;
+            foreach ($node->getNode('arguments')->getKeyValuePairs() as ['key' => $key]) {
+                $variables[] = $key->getAttribute('name');
             }
         } else if (
             $node instanceof SetNode ||
