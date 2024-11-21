@@ -311,4 +311,119 @@ class InvalidDotOperationTest extends AbstractTestCase
             "Error should not trigger when accessing dynamic object property"
         );
     }
+
+    public static function getTwigTemplateWithIterableTypes(): array
+    {
+        return [
+            [
+                <<<EOF
+                {% types {
+                    foos: '\\\\Exception[]',
+                } %}
+                {% for foo in foos %}
+                    {{ foo.bad }}
+                {% endfor %}
+                EOF,
+                false,
+            ],
+
+            [
+                <<<EOF
+                {% types {
+                    foos: 'iterable<string, \\\\Exception>',
+                } %}
+                {% for foo in foos %}
+                    {{ foo.bad }}
+                {% endfor %}
+                EOF,
+                false,
+            ],
+
+            [
+                <<<EOF
+                {% types {
+                    foos: 'iterable<string, iterable<string, \\\\Exception>>',
+                } %}
+                {% for bars in foos %}
+                    {% for baz in bars %}
+                        {{ baz.bad }}
+                    {% endfor %}
+                {% endfor %}
+                EOF,
+                false,
+            ],
+
+            [
+                <<<EOF
+                {% types {
+                    foos: 'iterable<string, string>',
+                } %}
+                {% for foo in foos %}
+                    {{ foo.bad }}
+                {% endfor %}
+                EOF,
+                false,
+            ],
+
+            [
+                <<<EOF
+                {% types {
+                    foos: 'iterable<string, string>',
+                } %}
+                {% for foo, bar in foos %}
+                    {{ foo.bad }}
+                {% endfor %}
+                EOF,
+                false,
+            ],
+
+            [
+                <<<EOF
+                {% types {
+                    foos: 'mixed[]',
+                } %}
+                {% for foo in foos %}
+                    {{ foo.bad }}
+                {% endfor %}
+                EOF,
+                true,
+            ],
+
+            [
+                <<<EOF
+                {% types {
+                    foos: '\\\\Exception[]',
+                } %}
+                {% for foo in foos %}
+                    {{ foo.code }}
+                {% endfor %}
+                EOF,
+                true,
+            ],
+
+            [
+                <<<EOF
+                {% types {
+                    foos: 'iterable[]',
+                } %}
+                {% for foo in foos %}
+                    {{ foo.code }}
+                {% endfor %}
+                EOF,
+                true,
+            ],
+        ];
+    }
+
+    /** @dataProvider getTwigTemplateWithIterableTypes */
+    public function test_itImpliesTypeFromIterables($template, bool $isValid): void
+    {
+        $this->env->createTemplate($template);
+
+        self::assertEquals(
+            $isValid,
+            empty($this->errors),
+            implode(', ', $this->errors)
+        );
+    }
 }

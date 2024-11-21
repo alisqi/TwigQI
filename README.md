@@ -128,6 +128,8 @@ they are rendered. This is the aim of a similar project: [TwigStan](https://gith
 * ✅ Runtime: non-nullable variable is null
 * ✅ Runtime: variable does not match type
 * ✅ Invalid object property or method (e.g., `{{ user.nmae }}`)
+  
+  Types for keys and values in `for` loops are automatically derived from iterable types.
 
   ⚠️ This inspection _can_ trigger false positives, depending on your template logic.
 * ⌛ Undeclared variable (i.e., missing in `types`, `set`, etc)

@@ -10,7 +10,6 @@ use phpDocumentor\Reflection\DocBlockFactory;
 use ReflectionClass;
 use Twig\Environment;
 use Twig\Node\Expression\ArrowFunctionExpression;
-use Twig\Node\Expression\FunctionExpression;
 use Twig\Node\Expression\GetAttrExpression;
 use Twig\Node\Expression\NameExpression;
 use Twig\Node\ForNode;
@@ -66,8 +65,8 @@ class InvalidDotOperation implements NodeVisitorInterface
             $node instanceof ForNode ||
             $node instanceof SetNode
         ) {
-            foreach ($this->extractScopedVariableNames($node) as $name) {
-                $this->getCurrentVariableTypeCollector()->push($name, 'mixed');
+            foreach ($this->extractScopedVariableTypes($node) as $name => $type) {
+                $this->getCurrentVariableTypeCollector()->push($name, $type);
             }
         }
 
@@ -153,7 +152,7 @@ class InvalidDotOperation implements NodeVisitorInterface
             $node instanceof ArrowFunctionExpression ||
             $node instanceof ForNode
         ) {
-            foreach ($this->extractScopedVariableNames($node) as $name) {
+            foreach (array_keys($this->extractScopedVariableTypes($node)) as $name) {
                 $this->getCurrentVariableTypeCollector()->pop($name);
             }
         }
@@ -161,8 +160,8 @@ class InvalidDotOperation implements NodeVisitorInterface
         return $node;
     }
 
-    /** @return list<string> */
-    private function extractScopedVariableNames(ArrowFunctionExpression|ForNode|SetNode $node): array
+    /** @return iterable<string, string> */
+    private function extractScopedVariableTypes(ArrowFunctionExpression|ForNode|SetNode $node): array
     {
         if (
             $node instanceof ArrowFunctionExpression ||
@@ -174,17 +173,44 @@ class InvalidDotOperation implements NodeVisitorInterface
                 return [];
             }
 
-            $variables = [$names->getNode('0')->getAttribute('name')];
+            $variables = [
+                $names->getNode('0')->getAttribute('name') => 'mixed'
+            ];
             if ($names->hasNode('1')) {
-                $variables[] = $names->getNode('1')->getAttribute('name');
+                $variables[$names->getNode('1')->getAttribute('name')] = 'mixed';
             }
             return $variables;
         }
 
         if ($node instanceof ForNode) {
+            $keyName   = $node->getNode('key_target')  ->getAttribute('name');
+            $valueName = $node->getNode('value_target')->getAttribute('name');
+
+            $keyType = $valueType = 'mixed';
+
+            if (($seqNode = $node->getNode('seq')) instanceof NameExpression) {
+                $seqName = $seqNode->getAttribute('name');
+
+                if ((null !== $seqType = $this->getCurrentVariableTypeCollector()->getDeclaredType($seqName))) {
+                    if (str_ends_with($seqType, '[]')) {
+                        $seqType = 'iterable<' . substr($seqType, 0, -2) . '>';
+                    }
+                    if (str_starts_with($seqType, 'iterable<')) {
+                        $matches = [];
+                        preg_match('/<((string|number),\s*)?(.+)>/', substr($seqType, 8), $matches);
+                        [, , $declaredKeyType, $declaredValueType] = $matches;
+
+                        if ($declaredKeyType !== '') {
+                            $keyType = $declaredKeyType;
+                        }
+                        $valueType = $declaredValueType;
+                    }
+                }
+            }
+
             return [
-                $node->getNode('key_target')->getAttribute('name'),
-                $node->getNode('value_target')->getAttribute('name'),
+                $keyName   => $keyType,
+                $valueName => $valueType,
             ];
         }
     }
