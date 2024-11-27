@@ -39,6 +39,9 @@ class InvalidDotOperationTest extends AbstractTestCase
             ['string'],
             ['number'],
             ['boolean'],
+            ['?string'],
+            ['?number'],
+            ['?boolean'],
         ];
     }
 
@@ -211,6 +214,23 @@ class InvalidDotOperationTest extends AbstractTestCase
         $this->env->createTemplate(
             <<<EOF
             {% types {foo: '$type'} %}
+            {{ foo.$attribute }}
+        EOF
+        );
+
+        self::assertEquals(
+            $isValid,
+            empty($this->errors),
+            implode(', ', $this->errors)
+        );
+    }
+
+    /** @dataProvider getClassNamesAndAttributes */
+    public function test_itValidatesDotOperationOnObjectsEvenIfNullable(string $type, string $attribute, bool $isValid): void
+    {
+        $this->env->createTemplate(
+            <<<EOF
+            {% types {foo: '?$type'} %}
             {{ foo.$attribute }}
         EOF
         );

@@ -94,6 +94,10 @@ class InvalidDotOperation implements NodeVisitorInterface
 
         $type = $variableTypeCollector->getDeclaredType($name);
 
+        if (str_starts_with($type, '?')) {
+            $type = substr($type, 1);
+        }
+        
         if (in_array($type, self::UNSUPPORTED_TYPES)) {
             trigger_error(
                 sprintf('Invalid dot operation on unsupported type \'%s\' (at %s)', $type, $location),
