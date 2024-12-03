@@ -29,6 +29,18 @@ class InvalidConstantTest extends AbstractTestCase
             implode(', ', $this->errors)
         );
     }
+    
+    /** @dataProvider getConstants */
+    public function test_itValidatesConstantTest(string $constant, bool $isValid): void
+    {
+        $this->env->createTemplate("{{ 'this' is constant('$constant') }}");
+
+        self::assertEquals(
+            $isValid,
+            empty($this->errors),
+            implode(', ', $this->errors)
+        );
+    }
 
     public static function getInvalidConstants(): array
     {

@@ -8,6 +8,7 @@ use AlisQI\TwigQI\Helper\NodeLocation;
 use Twig\Environment;
 use Twig\Node\Expression\ConstantExpression;
 use Twig\Node\Expression\FunctionExpression;
+use Twig\Node\Expression\Test\ConstantTest;
 use Twig\Node\Expression\Variable\ContextVariable;
 use Twig\Node\Node;
 use Twig\NodeVisitor\NodeVisitorInterface;
@@ -17,8 +18,8 @@ class InvalidConstant implements NodeVisitorInterface
     public function enterNode(Node $node, Environment $env): Node
     {
         if (
-            $node instanceof FunctionExpression &&
-            $node->getAttribute('name') === 'constant'
+            ($node instanceof FunctionExpression && $node->getAttribute('name') === 'constant') ||
+            $node instanceof ConstantTest
         ) {
             $this->checkArguments($node);
         }
@@ -26,11 +27,15 @@ class InvalidConstant implements NodeVisitorInterface
         return $node;
     }
 
-    private function checkArguments(FunctionExpression $node): void
+    private function checkArguments(FunctionExpression|ConstantTest $node): void
     {
         $arguments = $node->getNode('arguments');
 
-        if ($node->getAttribute('is_defined_test')) {
+        // ignore `constant('foo') is defined`
+        if (
+            $node instanceof FunctionExpression &&
+            $node->getAttribute('is_defined_test')
+        ) {
             return;
         }
 

@@ -8,7 +8,7 @@
             "name": "Jeroen Versteeg"
         }
     ],
-    "version": "1.0.5",
+    "version": "1.0.6",
     "autoload": {
         "psr-4": {
             "AlisQI\\TwigQI\\": "src/"
