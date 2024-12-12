@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use AlisQI\TwigQI\Tests\AbstractTestCase;
+namespace AlisQI\TwigQI\Tests;
 
 class RequiredMacroArgumentAfterOptionalTest extends AbstractTestCase
 {
