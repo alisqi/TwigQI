@@ -152,6 +152,7 @@ no explicit default value as required.
 * ✅ Call with *too many* arguments (except if `varargs` is used)
 * ✅ Call with *too few* arguments
 * ✅ Required argument declared after optional
+* ✅ Positional argument after named in call expression
 * ⌛ Type mismatch in macro call
 
 # Acknowledgments
