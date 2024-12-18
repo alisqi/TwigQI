@@ -27,7 +27,7 @@ final class AssertType
         }
 
         return match ($type) {
-            'string' => is_string($value),
+            'string' => is_string($value) || (is_object($value) && method_exists($value, '__toString')),
             'number' => is_int($value) || is_float($value),
             'boolean' => is_bool($value),
             'iterable' => is_iterable($value),

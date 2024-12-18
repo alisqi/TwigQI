@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace AlisQI\TwigQI\Tests;
 
 use ArrayIterator;
+use DateTime;
 use Exception;
+use Twig\Markup;
 use Twig\Node\Node;
 
 class TypeAssertionsTest extends AbstractTestCase
@@ -74,11 +76,13 @@ class TypeAssertionsTest extends AbstractTestCase
             ['string', 'hello', true],
             ['string', '', true],
             ['string', '0', true],
+            ['string', new Markup('hello', 'UTF-8'), true], // class Markup implements \Stringable
+            ['string', new Exception(), true], // Exception has __toString()
 
             ['string', true, false],
             ['string', 1, false],
             ['string', [], false],
-            ['string', new Exception(), false],
+            ['string', new DateTime(), false],
 
             ['number', 0, true],
             ['number', 1, true],
