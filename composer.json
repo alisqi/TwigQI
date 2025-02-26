@@ -25,6 +25,6 @@
         "phpdocumentor/reflection-docblock": "^5.4"
     },
     "require-dev": {
-        "phpunit/phpunit": "^10.5"
+        "phpunit/phpunit": "^11.5"
     }
 }
