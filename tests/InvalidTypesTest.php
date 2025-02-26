@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+
 class InvalidTypesTest extends AbstractTestCase
 {
     public static function getTypes(): array
@@ -35,7 +37,7 @@ class InvalidTypesTest extends AbstractTestCase
         ];
     }
 
-    /** @dataProvider getTypes */
+    #[DataProvider('getTypes')]
     public function test_itValidatesTypes(string $type, bool $isValid): void
     {
         $this->env->createTemplate("{% types {foo: '$type'} %}");
@@ -56,7 +58,7 @@ class InvalidTypesTest extends AbstractTestCase
         ];
     }
     
-    /** @dataProvider getDeprecatedTypes */
+    #[DataProvider('getDeprecatedTypes')]
     public function test_deprecatedTypes(string $type): void
     {
         $this->env->createTemplate("{% types {foo: '$type'} %}");
@@ -82,7 +84,7 @@ class InvalidTypesTest extends AbstractTestCase
         ];
     }
 
-    /** @dataProvider getNullableTypes */
+    #[DataProvider('getNullableTypes')]
     public function test_nullableShorthand(string $type, bool $isValid): void
     {
         $this->env->createTemplate("{% types {foo: '$type'} %}");
@@ -122,7 +124,7 @@ class InvalidTypesTest extends AbstractTestCase
         ];
     }
 
-    /** @dataProvider getIterableTypes */
+    #[DataProvider('getIterableTypes')]
     public function test_iterableTypes(string $type, bool $isValid): void
     {
         $this->env->createTemplate("{% types {foo: '$type'} %}");

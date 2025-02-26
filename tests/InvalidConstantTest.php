@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+
 class InvalidConstantTest extends AbstractTestCase
 {
     public static function getConstants(): array
@@ -18,7 +20,7 @@ class InvalidConstantTest extends AbstractTestCase
         ];
     }
 
-    /** @dataProvider getConstants */
+    #[DataProvider('getConstants')]
     public function test_itValidatesConstants(string $constant, bool $isValid): void
     {
         $this->env->createTemplate("{{ constant('$constant') }}");
@@ -30,7 +32,7 @@ class InvalidConstantTest extends AbstractTestCase
         );
     }
     
-    /** @dataProvider getConstants */
+    #[DataProvider('getConstants')]
     public function test_itValidatesConstantTest(string $constant, bool $isValid): void
     {
         $this->env->createTemplate("{{ 'this' is constant('$constant') }}");
@@ -55,7 +57,7 @@ class InvalidConstantTest extends AbstractTestCase
         ];
     }
 
-    /** @dataProvider getInvalidConstants */
+    #[DataProvider('getInvalidConstants')]
     public function test_itErrorsOnNonStringArguments(string $constant): void
     {
         $this->env->createTemplate("{{ constant($constant) }}");
@@ -82,7 +84,7 @@ class InvalidConstantTest extends AbstractTestCase
         ];
     }
 
-    /** @dataProvider getInvalidCalls */
+    #[DataProvider('getInvalidCalls')]
     public function test_itErrorsOnInvalidTwoArgumentCalls(string $call, string $expectedError): void
     {
         $this->env->createTemplate("{{ $call }}");

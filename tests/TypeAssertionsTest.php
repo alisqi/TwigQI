@@ -7,6 +7,7 @@ namespace AlisQI\TwigQI\Tests;
 use ArrayIterator;
 use DateTime;
 use Exception;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Twig\Markup;
 use Twig\Node\Node;
 
@@ -23,7 +24,7 @@ class TypeAssertionsTest extends AbstractTestCase
         ];
     }
 
-    /** @dataProvider getOptionalVariables */
+    #[DataProvider('getOptionalVariables')]
     public function test_optionalVariable(string $variable, array $context, bool $isValid): void
     {
         $this->env->createTemplate("{% types {{$variable}: 'string'} %}")
@@ -57,7 +58,7 @@ class TypeAssertionsTest extends AbstractTestCase
         ];
     }
 
-    /** @dataProvider getNullableTypes */
+    #[DataProvider('getNullableTypes')]
     public function test_nullableType(string $type, $value, bool $isValid): void
     {
         $this->env->createTemplate("{% types {foo: '$type'} %}")
@@ -160,7 +161,7 @@ class TypeAssertionsTest extends AbstractTestCase
         ];
     }
 
-    /** @dataProvider getTypes */
+    #[DataProvider('getTypes')]
     public function test_typeAssertion(string $type, $value, $isValid): void
     {
         $this->env->createTemplate("{% types {foo: '$type'} %}")

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+
 class RequiredMacroArgumentAfterOptionalTest extends AbstractTestCase
 {
     public static function getValidOrderTests(): array
@@ -15,7 +17,7 @@ class RequiredMacroArgumentAfterOptionalTest extends AbstractTestCase
         ];
     }
 
-    /** @dataProvider getValidOrderTests */
+    #[DataProvider('getValidOrderTests')]
     public function test_itDoesNotWarnForProperOrder(string $template): void
     {
         $this->env->createTemplate($template);
@@ -37,7 +39,7 @@ class RequiredMacroArgumentAfterOptionalTest extends AbstractTestCase
         ];
     }
 
-    /** @dataProvider getInvalidOrderTests */
+    #[DataProvider('getInvalidOrderTests')]
     public function test_itWarnsForRequiredAfterOptionalArgument(string $template, $error): void
     {
         $this->env->createTemplate($template);

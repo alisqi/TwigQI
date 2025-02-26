@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+
 class InvalidDotOperationTest extends AbstractTestCase
 {
     public function test_itIgnoresAttributesOnExpressions(): void
@@ -45,7 +47,7 @@ class InvalidDotOperationTest extends AbstractTestCase
         ];
     }
 
-    /** @dataProvider getInvalidTypesForDotOperator */
+    #[DataProvider('getInvalidTypesForDotOperator')]
     public function test_itDetectsDotOperatorOnUnsupportedTypes(string $type): void
     {
         $this->env->createTemplate(<<<EOF
@@ -182,7 +184,7 @@ class InvalidDotOperationTest extends AbstractTestCase
         ];
     }
 
-    /** @dataProvider getTemplatesWithMacros */
+    #[DataProvider('getTemplatesWithMacros')]
     public function test_isSupportsMacroScope(string $template): void
     {
         $this->env->createTemplate($template);
@@ -208,7 +210,7 @@ class InvalidDotOperationTest extends AbstractTestCase
         ];
     }
 
-    /** @dataProvider getClassNamesAndAttributes */
+    #[DataProvider('getClassNamesAndAttributes')]
     public function test_itValidatesDotOperationOnObjects(string $type, string $attribute, bool $isValid): void
     {
         $this->env->createTemplate(
@@ -225,7 +227,7 @@ class InvalidDotOperationTest extends AbstractTestCase
         );
     }
 
-    /** @dataProvider getClassNamesAndAttributes */
+    #[DataProvider('getClassNamesAndAttributes')]
     public function test_itValidatesDotOperationOnObjectsEvenIfNullable(string $type, string $attribute, bool $isValid): void
     {
         $this->env->createTemplate(
@@ -253,7 +255,7 @@ class InvalidDotOperationTest extends AbstractTestCase
         ];
     }
 
-    /** @dataProvider getAttributeShorthands */
+    #[DataProvider('getAttributeShorthands')]
     public function test_itSupportsAttributeShorthand(string $type, string $attribute): void
     {
         $this->env->createTemplate(
@@ -299,7 +301,7 @@ class InvalidDotOperationTest extends AbstractTestCase
         ];
     }
 
-    /** @dataProvider getTwigContentWithVariableOverloads */
+    #[DataProvider('getTwigContentWithVariableOverloads')]
     public function test_itSupportsNameOverloading(string $content, bool $isValid): void
     {
         $this->env->createTemplate(
@@ -435,7 +437,7 @@ class InvalidDotOperationTest extends AbstractTestCase
         ];
     }
 
-    /** @dataProvider getTwigTemplateWithIterableTypes */
+    #[DataProvider('getTwigTemplateWithIterableTypes')]
     public function test_itImpliesTypeFromIterables($template, bool $isValid): void
     {
         $this->env->createTemplate($template);

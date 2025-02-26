@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use Twig\Loader\FilesystemLoader;
 
 class BadArgumentCountInMacroCallTest extends AbstractTestCase
@@ -101,9 +102,9 @@ class BadArgumentCountInMacroCallTest extends AbstractTestCase
     }
 
     /**
-     * @dataProvider getTooFewArgumentsTestCases
      * @param list<string> $errors
      */
+    #[DataProvider('getTooFewArgumentsTestCases')]
     public function test_itWarnsForTooFewArguments(string $template, array $errors): void
     {
         $this->env->createTemplate($template);
