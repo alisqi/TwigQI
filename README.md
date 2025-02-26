@@ -134,7 +134,7 @@ they are rendered. This is the aim of a similar project: [TwigStan](https://gith
   ⚠️ This inspection _can_ trigger false positives, depending on your template logic.
 * ⌛ Undeclared variable (i.e., missing in `types`, `set`, etc)
 
-## Constants
+## Constants and enum cases
 * ✅ Invalid constant (e.g., `constant('BAD')`)
 * ✅ Expressions as first argument (e.g., `constant('UH' ~ 'OH')`)
  
@@ -142,6 +142,8 @@ they are rendered. This is the aim of a similar project: [TwigStan](https://gith
 * ✅ Second argument (object) is not a name (e.g., `constant('CONST', {})`)
   
   This is opinionated, too: `constant('CONST', foo ?: bar)` can work fine
+
+* ✅ Invalid enum case (e.g., `enum('\\Some\\Enum').InvalidCase`)
 
 ## Macros
 While Twig considers all macro arguments optional (and provides `null` as a default), TwigQI considers arguments with

@@ -8,6 +8,7 @@ use AlisQI\TwigQI\Assertion\WrapTypesInAssertedTypes;
 use AlisQI\TwigQI\Inspection\BadArgumentCountInMacroCall;
 use AlisQI\TwigQI\Inspection\InvalidConstant;
 use AlisQI\TwigQI\Inspection\InvalidDotOperation;
+use AlisQI\TwigQI\Inspection\InvalidEnumCase;
 use AlisQI\TwigQI\Inspection\PositionalMacroArgumentAfterNamed;
 use AlisQI\TwigQI\Inspection\RequiredMacroArgumentAfterOptional;
 use AlisQI\TwigQI\Inspection\UndeclaredVariableInMacro;
@@ -24,6 +25,7 @@ class Extension extends AbstractExtension
             new WrapTypesInAssertedTypes(),
 
             new InvalidConstant(),
+            new InvalidEnumCase(),
 
             new BadArgumentCountInMacroCall(),
             new PositionalMacroArgumentAfterNamed(),
