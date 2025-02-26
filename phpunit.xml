@@ -10,6 +10,7 @@
             <directory suffix=".php">./tests</directory>
             <exclude>./tests/AbstractTestCase.php</exclude>
             <exclude>./tests/Type/Dummy.php</exclude>
+            <exclude>./tests/Type/Enom.php</exclude>
         </testsuite>
     </testsuites>
 
