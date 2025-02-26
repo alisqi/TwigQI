@@ -56,7 +56,7 @@ since Twig will call that method with `null`. Instead of just having a buggy bad
 # Usage
 First, install using
 ```bash
-composer require --dev alisqi/twigqi:dev-main
+composer require --dev alisqi/twigqi
 ```
 
 Next, add the extension to your `Twig\Environment`:
