@@ -4,15 +4,22 @@ declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Tests;
 
-use ArrayIterator;
-use DateTime;
-use Exception;
+use AlisQI\TwigQI\Assertion\WrapTypesInAssertedTypes;
+use AlisQI\TwigQI\Extension;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Twig\Extension\ExtensionInterface;
 use Twig\Markup;
 use Twig\Node\Node;
 
 class TypeAssertionsTest extends AbstractTestCase
 {
+    protected function createUniqueExtensionClass(): ExtensionInterface
+    {
+        return new class([
+            new WrapTypesInAssertedTypes()
+        ]) extends Extension {};
+    }
+
     public static function getOptionalVariables(): array
     {
         return [
@@ -78,12 +85,12 @@ class TypeAssertionsTest extends AbstractTestCase
             ['string', '', true],
             ['string', '0', true],
             ['string', new Markup('hello', 'UTF-8'), true], // class Markup implements \Stringable
-            ['string', new Exception(), true], // Exception has __toString()
+            ['string', new \Exception(), true], // Exception has __toString()
 
             ['string', true, false],
             ['string', 1, false],
             ['string', [], false],
-            ['string', new DateTime(), false],
+            ['string', new \DateTime(), false],
 
             ['number', 0, true],
             ['number', 1, true],
@@ -93,7 +100,7 @@ class TypeAssertionsTest extends AbstractTestCase
             ['number', '', false],
             ['number', '0', false],
             ['number', [], false],
-            ['number', new Exception(), false],
+            ['number', new \Exception(), false],
 
             ['boolean', true, true],
             ['boolean', false, true],
@@ -102,9 +109,9 @@ class TypeAssertionsTest extends AbstractTestCase
             ['boolean', 'true', false],
             ['boolean', '0', false],
             ['boolean', [], false],
-            ['boolean', new Exception(), false],
+            ['boolean', new \Exception(), false],
 
-            ['object', new Exception(), true],
+            ['object', new \Exception(), true],
 
             ['object', 'object', false],
             ['object', true, false],
@@ -112,13 +119,13 @@ class TypeAssertionsTest extends AbstractTestCase
 
             ['iterable', [], true],
             ['iterable', [13, 37], true],
-            ['iterable', new ArrayIterator([13, 37]), true],
+            ['iterable', new \ArrayIterator([13, 37]), true],
             ['iterable', ['foo' => 'bar'], true],
             ['iterable', 'hello', false],
 
             ['iterable<string>', [], true],
             ['iterable<string>', ['hello'], true],
-            ['iterable<string>', new ArrayIterator(['hello']), true],
+            ['iterable<string>', new \ArrayIterator(['hello']), true],
             ['iterable<string>', [1337], false],
             ['iterable<string>', 'hello', false],
 
@@ -129,7 +136,7 @@ class TypeAssertionsTest extends AbstractTestCase
 
             ['iterable<string, string>', [], true],
             ['iterable<string, string>', ['foo' => 'bar'], true],
-            ['iterable<string, string>', new ArrayIterator(['foo' => 'bar']), true],
+            ['iterable<string, string>', new \ArrayIterator(['foo' => 'bar']), true],
             ['iterable<string, string>', ['foo' => 1337], false],
             ['iterable<string, string>', ['foo' => ['bar']], false],
             ['iterable<string, string>', [13, 37], false],
@@ -137,7 +144,7 @@ class TypeAssertionsTest extends AbstractTestCase
             ['iterable<number, number>', [], true],
             ['iterable<number, number>', [13, 37], true],
             ['iterable<number, number>', [13 => 37], true],
-            ['iterable<number, number>', new ArrayIterator([13 => 37]), true],
+            ['iterable<number, number>', new \ArrayIterator([13 => 37]), true],
             ['iterable<number, number>', ['13' => 37], true],
             ['iterable<number, number>', ['leet' => 1337], false],
 
@@ -150,11 +157,11 @@ class TypeAssertionsTest extends AbstractTestCase
             ['iterable<iterable<iterable<string, number>>>', [[[13, 37]]], false],
             ['iterable<iterable<iterable<string, number>>>', [[['foo' => 'bar']]], false],
 
-            ['\\\\Exception', new Exception(), true],
+            ['\\\\Exception', new \Exception(), true],
             ['\\\\Exception', new Node(), false],
             ['iterable<string, \\\\Twig\\\\Node\\\\Node>', ['node' => new Node()], true],
             ['iterable<string, \\\\Twig\\\\Node\\\\Node[]>', ['nodes' => [new Node(), new Node()]], true],
-            ['iterable<string, \\\\Twig\\\\Node\\\\Node>', ['node' => new Exception()], false],
+            ['iterable<string, \\\\Twig\\\\Node\\\\Node>', ['node' => new \Exception()], false],
 
             ['\\\\Traversable', new Node(), true],
             ['\\\\Traversable', true, false],

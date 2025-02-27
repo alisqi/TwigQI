@@ -4,10 +4,20 @@ declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Tests;
 
+use AlisQI\TwigQI\Extension;
+use AlisQI\TwigQI\Inspection\InvalidTypes;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Twig\Extension\ExtensionInterface;
 
 class InvalidTypesTest extends AbstractTestCase
 {
+    protected function createUniqueExtensionClass(): ExtensionInterface
+    {
+        return new class([
+            new InvalidTypes()
+        ]) extends Extension {};
+    }
+
     public static function getTypes(): array
     {
         return [

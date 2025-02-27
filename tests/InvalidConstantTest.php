@@ -4,10 +4,20 @@ declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Tests;
 
+use AlisQI\TwigQI\Extension;
+use AlisQI\TwigQI\Inspection\InvalidConstant;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Twig\Extension\ExtensionInterface;
 
 class InvalidConstantTest extends AbstractTestCase
 {
+    protected function createUniqueExtensionClass(): ExtensionInterface
+    {
+        return new class([
+            new InvalidConstant(),
+        ]) extends Extension {};
+    }
+
     public static function getConstants(): array
     {
         return [

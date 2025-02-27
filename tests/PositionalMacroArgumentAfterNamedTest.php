@@ -4,8 +4,19 @@ declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Tests;
 
+use AlisQI\TwigQI\Extension;
+use AlisQI\TwigQI\Inspection\PositionalMacroArgumentAfterNamed;
+use Twig\Extension\ExtensionInterface;
+
 class PositionalMacroArgumentAfterNamedTest extends AbstractTestCase
 {
+    protected function createUniqueExtensionClass(): ExtensionInterface
+    {
+        return new class([
+            new PositionalMacroArgumentAfterNamed()
+        ]) extends Extension {};
+    }
+
     public function test_itSupportsNamedArguments(): void
     {
         $this->env->createTemplate(<<<EOF

@@ -4,10 +4,20 @@ declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Tests;
 
+use AlisQI\TwigQI\Extension;
+use AlisQI\TwigQI\Inspection\InvalidDotOperation;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Twig\Extension\ExtensionInterface;
 
 class InvalidDotOperationTest extends AbstractTestCase
 {
+    protected function createUniqueExtensionClass(): ExtensionInterface
+    {
+        return new class([
+            new InvalidDotOperation()
+        ]) extends Extension {};
+    }
+
     public function test_itIgnoresAttributesOnExpressions(): void
     {
         $this->env->createTemplate(<<<EOF

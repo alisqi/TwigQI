@@ -4,8 +4,19 @@ declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Tests;
 
+use AlisQI\TwigQI\Extension;
+use AlisQI\TwigQI\Inspection\UndeclaredVariableInMacro;
+use Twig\Extension\ExtensionInterface;
+
 class UndeclaredVariableInMacroTest extends AbstractTestCase
 {
+    protected function createUniqueExtensionClass(): ExtensionInterface
+    {
+        return new class([
+            new UndeclaredVariableInMacro()
+        ]) extends Extension {};
+    }
+
     public function test_itDetectsNakedVariables()
     {
         $this->env->createTemplate(<<<EOF

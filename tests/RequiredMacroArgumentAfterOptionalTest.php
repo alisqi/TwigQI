@@ -4,10 +4,20 @@ declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Tests;
 
+use AlisQI\TwigQI\Extension;
+use AlisQI\TwigQI\Inspection\RequiredMacroArgumentAfterOptional;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Twig\Extension\ExtensionInterface;
 
 class RequiredMacroArgumentAfterOptionalTest extends AbstractTestCase
 {
+    protected function createUniqueExtensionClass(): ExtensionInterface
+    {
+        return new class([
+            new RequiredMacroArgumentAfterOptional()
+        ]) extends Extension {};
+    }
+
     public static function getValidOrderTests(): array
     {
         return [
