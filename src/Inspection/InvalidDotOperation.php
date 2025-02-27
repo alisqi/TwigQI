@@ -10,7 +10,9 @@ use phpDocumentor\Reflection\DocBlockFactory;
 use ReflectionClass;
 use Twig\Environment;
 use Twig\Node\Expression\ArrowFunctionExpression;
+use Twig\Node\Expression\ConstantExpression;
 use Twig\Node\Expression\GetAttrExpression;
+use Twig\Node\Expression\NameExpression;
 use Twig\Node\Expression\Variable\ContextVariable;
 use Twig\Node\ForNode;
 use Twig\Node\MacroNode;
@@ -73,11 +75,12 @@ class InvalidDotOperation implements NodeVisitorInterface
         if (
             $node instanceof GetAttrExpression &&
             $node->getAttribute('type') !== Template::ARRAY_CALL &&
-            ($nameNode = $node->getNode('node')) instanceof ContextVariable
+            ($nameNode = $node->getNode('node')) instanceof ContextVariable &&
+            ($attributeNode = $node->getNode('attribute')) instanceof ConstantExpression
         ) {
             $location = new NodeLocation($node);
             $name = $nameNode->getAttribute('name');
-            $attribute = $node->getNode('attribute')->getAttribute('value');
+            $attribute = $attributeNode->getAttribute('value');
             $this->checkOperation($name, $attribute, $location);
         }
 
@@ -97,7 +100,7 @@ class InvalidDotOperation implements NodeVisitorInterface
         if (str_starts_with($type, '?')) {
             $type = substr($type, 1);
         }
-        
+
         if (in_array($type, self::UNSUPPORTED_TYPES)) {
             trigger_error(
                 sprintf('Invalid dot operation on unsupported type \'%s\' (at %s)', $type, $location),
@@ -187,7 +190,7 @@ class InvalidDotOperation implements NodeVisitorInterface
         }
 
         if ($node instanceof ForNode) {
-            $keyName   = $node->getNode('key_target')  ->getAttribute('name');
+            $keyName = $node->getNode('key_target')->getAttribute('name');
             $valueName = $node->getNode('value_target')->getAttribute('name');
 
             $keyType = $valueType = 'mixed';

@@ -31,6 +31,30 @@ class InvalidDotOperationTest extends AbstractTestCase
         );
     }
 
+    public function test_itIgnoresEnumCaseValues(): void
+    {
+        $this->env->createTemplate(<<<EOF
+            {{ enum('\\\\AlisQI\\\\TwigQI\\\\Tests\\\\Type\\\\Enom').This.value }}
+        EOF);
+
+        self::assertEmpty(
+            $this->errors,
+            implode(', ', $this->errors)
+        );
+    }
+    
+    public function test_itIgnoresAttributeExpressions(): void
+    {
+        $this->env->createTemplate(<<<EOF
+            {{ foo.('bar' ?: 'baz') }}
+        EOF);
+
+        self::assertEmpty(
+            $this->errors,
+            implode(', ', $this->errors)
+        );
+    }
+
     public function test_itIgnoresUndeclaredVariables(): void
     {
         $this->env->createTemplate(<<<EOF
