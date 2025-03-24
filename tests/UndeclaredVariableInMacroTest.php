@@ -6,6 +6,7 @@ namespace AlisQI\TwigQI\Tests;
 
 use AlisQI\TwigQI\Extension;
 use AlisQI\TwigQI\Inspection\UndeclaredVariableInMacro;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Twig\Extension\ExtensionInterface;
 
 class UndeclaredVariableInMacroTest extends AbstractTestCase
@@ -33,50 +34,25 @@ class UndeclaredVariableInMacroTest extends AbstractTestCase
         self::assertStringContainsString('bar', $this->errors[1]);
         self::assertStringContainsString('marco', $this->errors[1]);
     }
-
-    public function test_itDetectsAdvancedVariableUsages(): void
+    
+    #[DataProvider('advancedVariableUsageExpressions')]
+    public function test_itDetectsAdvancedVariableUsages(string $expression): void
     {
-        // filter input
         $this->env->createTemplate(<<<EOF
             {% macro marco() %}
-                {{ foo|abs }}
+                {{ $expression }}
             {% endmacro %}
         EOF);
         
         self::assertCount(1, $this->errors);
-        
-        $this->errors = [];
-        
-        // function argument
-        $this->env->createTemplate(<<<EOF
-            {% macro marco() %}
-                {{ max(foo) }}
-            {% endmacro %}
-        EOF);
-        
-        self::assertCount(1, $this->errors);
-        
-        $this->errors = [];
+    }
 
-        // string interpolation
-        $this->env->createTemplate(<<<EOF
-            {% macro marco() %}
-                {{ "#{foo}" }}
-            {% endmacro %}
-        EOF);
-        
-        self::assertCount(1, $this->errors);
-        
-        $this->errors = [];
-        
-        // object keys
-        $this->env->createTemplate(<<<EOF
-            {% macro marco() %}
-                {{ {(foo): true} }}
-            {% endmacro %}
-        EOF);
-        
-        self::assertCount(1, $this->errors);
+    public static function advancedVariableUsageExpressions(): iterable
+    {
+        yield ['foo|abs'];
+        yield ['max(foo)'];
+        yield ['"#{foo}"'];
+        yield ['{(foo): true}'];
     }
 
     public function test_itIgnoresNonMacroCode()
