@@ -29,11 +29,6 @@ Just in case you need convincing, please consider the following example:
 
 ```twig
 {% macro userCard(user, showBadge = false) %}
-  {% types {
-    user: '\\User',
-    showBadge: 'boolean',
-  } %}
-  
   {{ user.name }}
   {% if showBadge %}
     {% if usr.admin %} {# Oops #}
