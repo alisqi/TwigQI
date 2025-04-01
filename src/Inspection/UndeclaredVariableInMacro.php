@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Inspection;
 
+use Psr\Log\LoggerInterface;
 use Twig\Environment;
 use Twig\Node\Expression\ArrowFunctionExpression;
 use Twig\Node\Expression\Variable\ContextVariable;
@@ -29,6 +30,11 @@ class UndeclaredVariableInMacro implements NodeVisitorInterface
      * @var string[]
      */
     private array $declaredVariableNames = [];
+
+    public function __construct(
+        private readonly LoggerInterface $logger,
+    ) {
+    }
 
     public function enterNode(Node $node, Environment $env): Node
     {
@@ -113,7 +119,7 @@ class UndeclaredVariableInMacro implements NodeVisitorInterface
             !in_array($variableName, $this->declaredVariableNames, false) &&
             !in_array($variableName, self::SPECIAL_VARIABLE_NAMES, false)
         ) {
-            trigger_error(
+            $this->logger->warning(
                 sprintf(
                     'The macro "%s" (%s:%d) uses an undeclared variable named "%s".',
                     $this->currentMacro,
@@ -121,7 +127,6 @@ class UndeclaredVariableInMacro implements NodeVisitorInterface
                     $node->getTemplateLine(),
                     $variableName,
                 ),
-                E_USER_WARNING
             );
         }
     }

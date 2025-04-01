@@ -7,17 +7,19 @@ namespace AlisQI\TwigQI\Tests;
 use AlisQI\TwigQI\Assertion\WrapTypesInAssertedTypes;
 use AlisQI\TwigQI\Extension;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Psr\Log\LoggerInterface;
 use Twig\Extension\ExtensionInterface;
 use Twig\Markup;
 use Twig\Node\Node;
 
 class TypeAssertionsTest extends AbstractTestCase
 {
-    protected function createUniqueExtensionClass(): ExtensionInterface
+    protected function createUniqueExtensionClass(LoggerInterface $logger): ExtensionInterface
     {
-        return new class([
-            new WrapTypesInAssertedTypes()
-        ]) extends Extension {};
+        return new class(
+            $logger,
+            [WrapTypesInAssertedTypes::class],
+        ) extends Extension {};
     }
 
     public static function getOptionalVariables(): array

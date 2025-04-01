@@ -7,16 +7,18 @@ namespace AlisQI\TwigQI\Tests;
 use AlisQI\TwigQI\Extension;
 use AlisQI\TwigQI\Inspection\BadArgumentCountInMacroCall;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Psr\Log\LoggerInterface;
 use Twig\Extension\ExtensionInterface;
 use Twig\Loader\FilesystemLoader;
 
 class BadArgumentCountInMacroCallTest extends AbstractTestCase
 {
-    protected function createUniqueExtensionClass(): ExtensionInterface
+    protected function createUniqueExtensionClass(LoggerInterface $logger): ExtensionInterface
     {
-        return new class([
-            new BadArgumentCountInMacroCall()
-        ]) extends Extension {};
+        return new class(
+            $logger,
+            [BadArgumentCountInMacroCall::class]
+        ) extends Extension {};
     }
 
     public function test_itDoesNotWarnForMatchingArgumentNumber(): void

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AlisQI\TwigQI\Inspection;
 
 use AlisQI\TwigQI\Helper\NodeLocation;
+use Psr\Log\LoggerInterface;
 use Twig\Environment;
 use Twig\Node\Expression\MacroReferenceExpression;
 use Twig\Node\Expression\Variable\ContextVariable;
@@ -18,15 +19,20 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
      * The top-level array has the macro's name as keys and its calls as value.
      * Each call is represented as an array containing the number of arguments
      * and the source location of the call.
-     * 
+     *
      * For example:
      * ```php
      * ['marco' => [[1, NodeLocation]]];
      * ```
-     * 
+     *
      * @var array<string, array<array{0: int, 1: NodeLocation}>>
      */
     private array $macroCalls = [];
+
+    public function __construct(
+        private readonly LoggerInterface $logger,
+    ) {
+    }
 
     public function enterNode(Node $node, Environment $env): Node
     {
@@ -42,7 +48,7 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
             foreach ($node->getNode('arguments')->getKeyValuePairs() as ['key' => $key, 'value' => $default]) {
                 $name = $key->getAttribute('name');
                 $signature[] = [
-                    'name'     => $name,
+                    'name' => $name,
                     'required' => $default->hasAttribute('is_implicit') // if attr is set, it's always true
                 ];
             }
@@ -53,19 +59,19 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
             }
 
             $this->checkCalls($macroName, $signature);
-            
+
             unset($this->macroCalls[$macroName]); // remove logged calls to prevent collisions (macro with identical name in another template)
         } elseif ($node instanceof MacroReferenceExpression) {
             // when visiting a function call, log call
             $macroName = substr($node->getAttribute('name'), strlen('macro_'));
 
             $location = new NodeLocation($node);
-            
+
             $argumentCount = count($node->getNode('arguments')->getKeyValuePairs());
 
             $this->macroCalls[$macroName][] = [$argumentCount, $location];
         }
-        
+
         return $node;
     }
 
@@ -78,27 +84,25 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
             // check for too _many_ arguments
             $usesVarArgs = array_filter(
                 $signature,
-                static fn (array $argument) => $argument['name'] === MacroNode::VARARGS_NAME
+                static fn(array $argument) => $argument['name'] === MacroNode::VARARGS_NAME
             );
             if (
                 !$usesVarArgs &&
                 $argumentCount > count($signature)
             ) {
-                trigger_error(
+                $this->logger->warning(
                     "Too many arguments ($argumentCount) for macro '$macro' (at $location)",
-                    E_USER_WARNING
                 );
             }
-            
+
             // check for too _few_ arguments
             $requiredArguments = array_filter(
                 $signature,
                 static fn(array $param) => $param['required']
             );
             if ($argumentCount < count($requiredArguments)) {
-                trigger_error(
+                $this->logger->warning(
                     "Too few arguments ($argumentCount) for macro '$macro' (at $location)",
-                    E_USER_WARNING
                 );
             }
         }
@@ -114,20 +118,21 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
         return 0;
     }
 
-    private function hasVarArgsContextVariableDescendant(Node $node): bool {
+    private function hasVarArgsContextVariableDescendant(Node $node): bool
+    {
         if (
             $node instanceof ContextVariable &&
             $node->getAttribute('name') === MacroNode::VARARGS_NAME
         ) {
             return true;
         }
-    
+
         foreach ($node as $childNode) {
             if ($this->hasVarArgsContextVariableDescendant($childNode)) {
                 return true;
             }
         }
-    
+
         return false;
     }
 }

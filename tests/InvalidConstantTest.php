@@ -7,15 +7,17 @@ namespace AlisQI\TwigQI\Tests;
 use AlisQI\TwigQI\Extension;
 use AlisQI\TwigQI\Inspection\InvalidConstant;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Psr\Log\LoggerInterface;
 use Twig\Extension\ExtensionInterface;
 
 class InvalidConstantTest extends AbstractTestCase
 {
-    protected function createUniqueExtensionClass(): ExtensionInterface
+    protected function createUniqueExtensionClass(LoggerInterface $logger): ExtensionInterface
     {
-        return new class([
-            new InvalidConstant(),
-        ]) extends Extension {};
+        return new class(
+            $logger,
+            [InvalidConstant::class]
+        ) extends Extension {};
     }
 
     public static function getConstants(): array

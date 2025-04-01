@@ -7,6 +7,7 @@ namespace AlisQI\TwigQI\Inspection;
 use AlisQI\TwigQI\Helper\NodeLocation;
 use AlisQI\TwigQI\Helper\VariableTypeCollector;
 use phpDocumentor\Reflection\DocBlockFactory;
+use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use Twig\Environment;
 use Twig\Node\Expression\ArrowFunctionExpression;
@@ -34,8 +35,9 @@ class InvalidDotOperation implements NodeVisitorInterface
     private VariableTypeCollector $globalVariableTypeCollector;
     private ?VariableTypeCollector $scopedVariableTypeCollector = null;
 
-    public function __construct()
-    {
+    public function __construct(
+        private readonly LoggerInterface $logger,
+    ) {
         $this->globalVariableTypeCollector = new VariableTypeCollector();
     }
 
@@ -102,9 +104,8 @@ class InvalidDotOperation implements NodeVisitorInterface
         }
 
         if (in_array($type, self::UNSUPPORTED_TYPES)) {
-            trigger_error(
+            $this->logger->error(
                 sprintf('Invalid dot operation on unsupported type \'%s\' (at %s)', $type, $location),
-                E_USER_ERROR
             );
         }
 
@@ -147,9 +148,8 @@ class InvalidDotOperation implements NodeVisitorInterface
             break; // don't try other potential methods
         }
 
-        trigger_error(
+        $this->logger->error(
             "Invalid attribute '$attribute' for type '$type' (at $location)'",
-            E_USER_ERROR
         );
     }
 

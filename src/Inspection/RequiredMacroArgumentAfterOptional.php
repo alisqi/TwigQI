@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AlisQI\TwigQI\Inspection;
 
 use AlisQI\TwigQI\Helper\NodeLocation;
+use Psr\Log\LoggerInterface;
 use Twig\Environment;
 use Twig\Node\MacroNode;
 use Twig\Node\Node;
@@ -12,6 +13,11 @@ use Twig\NodeVisitor\NodeVisitorInterface;
 
 class RequiredMacroArgumentAfterOptional implements NodeVisitorInterface
 {
+    public function __construct(
+        private readonly LoggerInterface $logger,
+    ) {
+    }
+
     public function enterNode(Node $node, Environment $env): Node
     {
         if ($node instanceof MacroNode) {
@@ -25,9 +31,8 @@ class RequiredMacroArgumentAfterOptional implements NodeVisitorInterface
                 $currentArgumentIsRequired = $default->hasAttribute('is_implicit'); // if attr is set, it's always true
 
                 if ($currentArgumentIsRequired && $previousArgumentIsRequired === false) {
-                    trigger_error(
+                    $this->logger->warning(
                         "Macro '$macroName' argument '$name' is required, but previous isn't (at $location)",
-                        E_USER_WARNING
                     );
 
                     break; // skip any following arguments

@@ -6,15 +6,17 @@ namespace AlisQI\TwigQI\Tests;
 
 use AlisQI\TwigQI\Extension;
 use AlisQI\TwigQI\Inspection\PositionalMacroArgumentAfterNamed;
+use Psr\Log\LoggerInterface;
 use Twig\Extension\ExtensionInterface;
 
 class PositionalMacroArgumentAfterNamedTest extends AbstractTestCase
 {
-    protected function createUniqueExtensionClass(): ExtensionInterface
+    protected function createUniqueExtensionClass(LoggerInterface $logger): ExtensionInterface
     {
-        return new class([
-            new PositionalMacroArgumentAfterNamed()
-        ]) extends Extension {};
+        return new class(
+            $logger,
+            [PositionalMacroArgumentAfterNamed::class]
+        ) extends Extension {};
     }
 
     public function test_itSupportsNamedArguments(): void

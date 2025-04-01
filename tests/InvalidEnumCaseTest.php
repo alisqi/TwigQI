@@ -7,15 +7,17 @@ namespace AlisQI\TwigQI\Tests;
 use AlisQI\TwigQI\Extension;
 use AlisQI\TwigQI\Inspection\InvalidEnumCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Psr\Log\LoggerInterface;
 use Twig\Extension\ExtensionInterface;
 
 class InvalidEnumCaseTest extends AbstractTestCase
 {
-    protected function createUniqueExtensionClass(): ExtensionInterface
+    protected function createUniqueExtensionClass(LoggerInterface $logger): ExtensionInterface
     {
-        return new class([
-            new InvalidEnumCase()
-        ]) extends Extension {};
+        return new class(
+            $logger,
+            [InvalidEnumCase::class],
+        ) extends Extension {};
     }
 
     public static function getEnomCases(): array

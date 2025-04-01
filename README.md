@@ -56,23 +56,36 @@ composer require --dev alisqi/twigqi
 
 Next, add the extension to your `Twig\Environment`:
 ```php
-$twig->addExtension(new AlisQI\TwigQI\Extension());
+$logger = new AlisQI\TwigQI\Logger\TriggerErrorLogger();
+$twig->addExtension(new AlisQI\TwigQI\Extension($logger));
 ```
 
-Any issues will be reported using PHP's `trigger_error` with `E_USER_*` levels.
+The `TriggerErrorLogger` will report issues using PHP's `trigger_error` with `E_USER_*` levels.
+Alternatively, you can use any other logger `\Psr\Log\LoggerInterface` implementation.
+
 Set up your app and/or CI build to report these as you see fit.
 
 And that's it! 😎
 
+## Configuration
+You can cherry-pick your inspections (see below):
+```php
+use AlisQI\TwigQI\Extension;
+use \AlisQI\TwigQI\Inspection\InvalidConstant;
+use \AlisQI\TwigQI\Inspection\InvalidEnumCase;
+
+new Extension($logger, [
+    InvalidConstant::class,
+    InvalidEnumCase::class,
+]);
+```
+
 # Design
 The current design uses `NodeVisitor` classes for every inspection. That allows for easy testing and configurability.
 
-The reason the inspections use `trigger_error` instead of `Exception`s is that the latter would halt compilation,
-preventing the extension from reporting multiple issues in one go.
-
-The level of error (error, warning, notice) depends entirely on the authors' opinions on code quality. `E_USER_ERROR` is
-used for, well, errors, that the author(s) deem actual errors in code. For more opinionated issues (e.g., relying on
-macro arguments always being optional), `E_USER_WARNING` is used.
+The level of error (error, warning, notice) depends entirely on the authors' opinions on code quality. `LogLevel::ERROR`
+is used for, well, errors, that the author(s) deem actual errors in code. `LogLevel::WARNING` is used for more
+opinionated issues, such as relying on macro arguments always being optional.
 
 ## Typing system and syntax
 Many inspections rely on proper typing. However, the [documentation for the `types` tag](https://twig.symfony.com/doc/3.x/tags/types.html)

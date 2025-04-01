@@ -1,0 +1,4 @@
+# 3.0.0
+
+ * Implement #2: Psr\Logger
+   Adding the `LoggerInterface` dependencies in constructors is b/c-breaking, hence the major version bump.

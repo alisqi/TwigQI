@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AlisQI\TwigQI\Inspection;
 
 use AlisQI\TwigQI\Helper\NodeLocation;
+use Psr\Log\LoggerInterface;
 use Twig\Environment;
 use Twig\Node\Expression\ConstantExpression;
 use Twig\Node\Expression\FunctionExpression;
@@ -15,6 +16,11 @@ use Twig\NodeVisitor\NodeVisitorInterface;
 
 class InvalidConstant implements NodeVisitorInterface
 {
+    public function __construct(
+        private readonly LoggerInterface $logger,
+    ) {
+    }
+
     public function enterNode(Node $node, Environment $env): Node
     {
         if (
@@ -52,7 +58,7 @@ class InvalidConstant implements NodeVisitorInterface
         }
 
         if ($error) {
-            trigger_error("Invalid constant() call: $error (at $location)", E_USER_ERROR);
+            $this->logger->error("Invalid constant() call: $error (at $location)");
         }
     }
 
