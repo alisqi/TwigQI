@@ -10,6 +10,9 @@ Twig Quality Inspections is an extension to the [Twig templating](https://github
 which adds static analysis (i.e., compile-time) inspections and runtime assertions to increase templates' quality.
 See the [inspections section](#Inspections) below for details.
 
+What this tool will do is to show Symfony's red error page in the DEV environment whenever it encounters an error.
+There's no runner, there's no output (yet).
+
 Unlike other projects like [curlylint](https://www.curlylint.org/) and [djLint](https://www.djlint.com/docs/linter/),
 which focus on HTML, this tool exclusively analyzes the Twig code.
 
