@@ -103,8 +103,8 @@ $twig->addExtension(new AlisQI\TwigQI\Extension($logger));
 You can cherry-pick your inspections (see below):
 ```php
 use AlisQI\TwigQI\Extension;
-use \AlisQI\TwigQI\Inspection\InvalidConstant;
-use \AlisQI\TwigQI\Inspection\InvalidEnumCase;
+use AlisQI\TwigQI\Inspection\InvalidConstant;
+use AlisQI\TwigQI\Inspection\InvalidEnumCase;
 
 new Extension($logger, [
     InvalidConstant::class,
