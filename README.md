@@ -48,26 +48,58 @@ is likely disabled. A bug for sure, but perhaps not a critical one.
 However, `user.getRoleLabel(usr.role)` will cause an uncaught `TypeError` if that method's parameter is not nullable,
 since Twig will call that method with `null`. Instead of just having a buggy badge, *the whole page breaks*.
 
-# Usage
+# Installation
 First, install using
 ```bash
 composer require --dev alisqi/twigqi
 ```
 
-Next, add the extension to your `Twig\Environment`:
+## Symfony integration
+In a Symfony application, you can enable the extension in your `config\services.yaml`
+```yaml
+when@dev:
+    services:
+        AlisQI\TwigQI\Extension:
+            autowire: true
+            tags: [ 'twig.extension' ]
+```
+
+Alternatively, you can extend `AlisQI\TwigQI\Extension` and add the `When` attribute.
 ```php
-$logger = new AlisQI\TwigQI\Logger\TriggerErrorLogger();
+<?php
+
+namespace App\Twig;
+
+use AlisQI\TwigQI\Extension;
+use Symfony\Component\DependencyInjection\Attribute\When;
+
+#[When('dev')]
+class QualityExtension extends Extension {}
+```
+This allows you to configure which inspections to enable. See details below. 
+
+### Logging
+Either way, all inspection results will [show up](docs/error-on-page.png) in the Web Debug Toolbar's logs.
+
+![Error shown in Web Debug Toolbar](docs/error-in-wdt.png)
+
+This example is based on the [Symfony demo application](https://github.com/symfony/demo), where
+`src/templates/blog/post_show.html.twig` was amended to include the following in the `main` block:
+```twig
+{% types post: '\\App\\Entity\\Post' %}
+{% if false %} {# to demonstrate static typing during template compilation #}
+    {{ post.tilte }}
+{% endif %}
+```
+
+## Non-Symfony projects
+You can also add the extension manually to your `Twig\Environment`:
+```php
 $twig->addExtension(new AlisQI\TwigQI\Extension($logger));
 ```
 
-The `TriggerErrorLogger` will report issues using PHP's `trigger_error` with `E_USER_*` levels.
-Alternatively, you can use any other logger `\Psr\Log\LoggerInterface` implementation.
-
-Set up your app and/or CI build to report these as you see fit.
-
-And that's it! 😎
-
 ## Configuration
+### Select inspections
 You can cherry-pick your inspections (see below):
 ```php
 use AlisQI\TwigQI\Extension;
@@ -79,6 +111,12 @@ new Extension($logger, [
     InvalidEnumCase::class,
 ]);
 ```
+
+### Logging
+The extension class requires a `\Psr\Log\LoggerInterface` implementation.
+
+This package includes the `TriggerErrorLogger` class, which reports issues using PHP's `trigger_error()`
+with appropriate `E_USER_*` levels.
 
 # Design
 The current design uses `NodeVisitor` classes for every inspection. That allows for easy testing and configurability.
