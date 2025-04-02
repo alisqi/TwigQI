@@ -10,19 +10,11 @@ Twig Quality Inspections is an extension to the [Twig templating](https://github
 which adds static analysis (i.e., compile-time) inspections and runtime assertions to increase templates' quality.
 See the [inspections section](#Inspections) below for details.
 
-Unlike other projects like [curlylint](https://www.curlylint.org/) and [djLint](https://www.djlint.com/docs/linter/),
-which focus on HTML, this tool exclusively analyzes the Twig code.
+
 
 The two intended use cases are:
 * Add the extension to the `Twig\Environment` during development
 * Invoke a CLI command in CI and/or pre-commit hook which compiles all templates with the extension enabled.
-
-> [!NOTE]
-> TwigQI is stable and should work in most codebases due to its simplicity. I would love to hear about your experience
-> using it. Please create an issue or a pull request if you've found an issue. 🙏
-
-Note that TwigQI doesn't support every single edge case, plus it is a little opinionated. You've been warned! 😉
-The good news is that you can easily create a bespoke suite by cherry-picking the inspections.
 
 # Justification
 Just in case you need convincing, please consider the following example:
@@ -41,9 +33,8 @@ Just in case you need convincing, please consider the following example:
 ```
 
 Here, `usr.admin` is obviously a typo. Fortunately, this bug is easily detected with `strict_types` enabled,
-but only if the macro is called with `showBadge=true`, which might be uncommon enough to go unnoticed during
-development. In this example, the `(admin)` badge will simply never be printed in production, where `strict_types`
-is likely disabled. A bug for sure, but perhaps not a critical one.
+but only if the macro is called with `showBadge=true`. In this example, the `(admin)` badge will simply never be printed in production
+(where `strict_types` is likely disabled).
 
 However, `user.getRoleLabel(usr.role)` will cause an uncaught `TypeError` if that method's parameter is not nullable,
 since Twig will call that method with `null`. Instead of just having a buggy badge, *the whole page breaks*.
@@ -55,17 +46,11 @@ composer require --dev alisqi/twigqi
 ```
 
 ## Symfony integration
-In a Symfony application, you can enable the extension in your `config\services.yaml`
-```yaml
-when@dev:
-    services:
-        AlisQI\TwigQI\Extension:
-            autowire: true
-            tags: [ 'twig.extension' ]
-```
+In a Symfony application, the recommended way is to create a class that extends `AlisQI\TwigQI\Extension` and add the `When` attribute.
+This allows you to configure which inspections to enable.
 
-Alternatively, you can extend `AlisQI\TwigQI\Extension` and add the `When` attribute.
 ```php
+// src/Twig/TwigQIExtension.php
 <?php
 
 namespace App\Twig;
@@ -74,11 +59,38 @@ use AlisQI\TwigQI\Extension;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
 #[When('dev')]
-class QualityExtension extends Extension {}
-```
-This allows you to configure which inspections to enable. See details below. 
+final class TwigQIExtension extends AbstractExtension
+{
+    public function getNodeVisitors(): array
+    {
+        return [
+            // Assertions:
+            new WrapTypesInAssertedTypes(),
 
-### Logging
+            // Inspections:
+            // new BadArgumentCountInMacroCall(), // Kills the Web Debug Toolbar: https://github.com/alisqi/TwigQI/issues/3#issuecomment-2651503912
+            new InvalidConstant(),
+            new InvalidDotOperation(),
+            new InvalidTypes(),
+            new PositionalMacroArgumentAfterNamed(),
+            new RequiredMacroArgumentAfterOptional(),
+            // new UndeclaredVariableInMacro(), // Kills the Web Debug Toolbar: https://github.com/alisqi/TwigQI/issues/3#issuecomment-2651503912
+        ];
+    }
+}
+```
+
+Alternatively, if you want *all* inspections, you can enable the extension in your `config/services.yaml`:
+
+```yaml
+when@dev:
+    services:
+        AlisQI\TwigQI\Extension:
+            autowire: true
+            tags: [ 'twig.extension' ]
+```
+
+### Output & Logging
 Either way, all inspection results will [show up](docs/error-on-page.png) in the Web Debug Toolbar's logs.
 
 ![Error shown in Web Debug Toolbar](docs/error-in-wdt.png)
@@ -99,18 +111,6 @@ $twig->addExtension(new AlisQI\TwigQI\Extension($logger));
 ```
 
 ## Configuration
-### Select inspections
-You can cherry-pick your inspections (see below):
-```php
-use AlisQI\TwigQI\Extension;
-use AlisQI\TwigQI\Inspection\InvalidConstant;
-use AlisQI\TwigQI\Inspection\InvalidEnumCase;
-
-new Extension($logger, [
-    InvalidConstant::class,
-    InvalidEnumCase::class,
-]);
-```
 
 ### Logging
 The extension class requires a `\Psr\Log\LoggerInterface` implementation.
@@ -202,6 +202,11 @@ no explicit default value as required.
 * ✅ Required argument declared after optional
 * ✅ Positional argument after named in call expression
 * ⌛ Type mismatch in macro call
+
+# Similar Projects
+
+* [curlylint](https://www.curlylint.org/): Focuses on HTML
+* [djLint](https://www.djlint.com/docs/linter/): Focuses on HTML
 
 # Acknowledgments
 Big thanks to [Ruud Kamphuis](https://github.com/ruudk) for [TwigStan](https://github.com/twigstan/twigstan),
