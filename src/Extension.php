@@ -13,7 +13,6 @@ use AlisQI\TwigQI\Inspection\PositionalMacroArgumentAfterNamed;
 use AlisQI\TwigQI\Inspection\RequiredMacroArgumentAfterOptional;
 use AlisQI\TwigQI\Inspection\UndeclaredVariableInMacro;
 use AlisQI\TwigQI\Inspection\InvalidTypes;
-use phpDocumentor\Reflection\Types\ClassString;
 use Psr\Log\LoggerInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\NodeVisitor\NodeVisitorInterface;
