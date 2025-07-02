@@ -126,6 +126,11 @@ class InvalidTypesTest extends AbstractTestCase
             ['iterable<number,number>', true],
             ['iterable<string, ?number>', true],
             ['iterable<string, iterable<number>>', true],
+            ['iterable<string, iterable<number[]>>', true],
+            ['iterable<string, iterable<string, number[]>>', true],
+            ['iterable<string, iterable<string, \\\\Exception[]>>', true],
+            ['iterable<string, iterable<string, iterable<\\\\Exception>>>', true],
+            ['iterable<string, iterable<string, ?\\\\Exception[]>>', true],
 
             ['iterable<boolean, number>', false],
             ['iterable<iterable, number>', false],
