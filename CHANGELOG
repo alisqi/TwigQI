@@ -1,3 +1,6 @@
+# 3.1.0
+ * Feature: Detect invalid named arguments in macro calls
+
 # 3.0.1
  * Bugfix: runtime type assertions support traits
 

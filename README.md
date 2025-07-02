@@ -195,12 +195,13 @@ they are rendered. This is the aim of a similar project: [TwigStan](https://gith
 While Twig considers all macro arguments optional (and provides `null` as a default), TwigQI considers arguments with
 no explicit default value as required.
 
-* ⌛ Arguments not declared using `types`
 * ✅ Undefined variable used (arguments, `{% set %}`, etc)
 * ✅ Call with *too many* arguments (except if `varargs` is used)
 * ✅ Call with *too few* arguments
 * ✅ Required argument declared after optional
 * ✅ Positional argument after named in call expression
+* ✅ Invalid named argument in call expression
+* ⌛ Arguments not declared using `types`
 * ⌛ Type mismatch in macro call
 
 # Similar Projects
