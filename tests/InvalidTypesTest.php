@@ -39,7 +39,8 @@ class InvalidTypesTest extends AbstractTestCase
             
             ["\\\\Exception", true],
             ["\\\\Iterator", true],
-            ["\\\\PHPUnit\\\\Framework\\\\MockObject\\\\Method", true],
+            ["\\\\AlisQI\\\\TwigQI\\\\Tests\\\\Type\\\\Enom", true],
+            ["\\\\AlisQI\\\\TwigQI\\\\Tests\\\\Type\\\\Traet", true],
             ["\\\\Twig\\\\Token", true],
             ["Exception", false],
             ["\\\\Foo", false],

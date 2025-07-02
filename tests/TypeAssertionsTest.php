@@ -6,6 +6,8 @@ namespace AlisQI\TwigQI\Tests;
 
 use AlisQI\TwigQI\Assertion\WrapTypesInAssertedTypes;
 use AlisQI\TwigQI\Extension;
+use AlisQI\TwigQI\Tests\Type\Enom;
+use AlisQI\TwigQI\Tests\Type\Treated;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\Log\LoggerInterface;
 use Twig\Extension\ExtensionInterface;
@@ -118,6 +120,12 @@ class TypeAssertionsTest extends AbstractTestCase
             ['object', 'object', false],
             ['object', true, false],
             ['object', [], false],
+            
+            ['\\\\Exception', new \Exception(), true],
+            ['\\\\Exception', new Node(), false],
+            
+            ['\\\\AlisQI\\\\TwigQI\\\\Tests\\\\Type\\\\Enom', Enom::This, true],
+            ['\\\\AlisQI\\\\TwigQI\\\\Tests\\\\Type\\\\Enom', new Node(), false],
 
             ['iterable', [], true],
             ['iterable', [13, 37], true],
@@ -159,11 +167,12 @@ class TypeAssertionsTest extends AbstractTestCase
             ['iterable<iterable<iterable<string, number>>>', [[[13, 37]]], false],
             ['iterable<iterable<iterable<string, number>>>', [[['foo' => 'bar']]], false],
 
-            ['\\\\Exception', new \Exception(), true],
-            ['\\\\Exception', new Node(), false],
             ['iterable<string, \\\\Twig\\\\Node\\\\Node>', ['node' => new Node()], true],
-            ['iterable<string, \\\\Twig\\\\Node\\\\Node[]>', ['nodes' => [new Node(), new Node()]], true],
             ['iterable<string, \\\\Twig\\\\Node\\\\Node>', ['node' => new \Exception()], false],
+            ['iterable<string, \\\\Twig\\\\Node\\\\Node[]>', ['nodes' => [new Node(), new Node()]], true],
+            ['iterable<string, \\\\Twig\\\\Node\\\\Node[]>', ['nodes' => [new Node(), new Node()]], true],
+            ['iterable<string, \\\\Twig\\\\Node\\\\Node[]>', ['nodes' => [new \Exception()]], false],
+            ['iterable<string, \\\\Twig\\\\Node\\\\Node[]>', ['nodes' => [new Node(), new \Exception()]], false],
 
             ['\\\\Traversable', new Node(), true],
             ['\\\\Traversable', true, false],
@@ -179,7 +188,7 @@ class TypeAssertionsTest extends AbstractTestCase
         self::assertEquals(
             $isValid,
             empty($this->errors),
-            implode(', ', $this->errors)
+            "Type '$type':" . implode(', ', $this->errors)
         );
     }
 }
