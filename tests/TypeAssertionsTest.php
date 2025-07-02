@@ -7,7 +7,7 @@ namespace AlisQI\TwigQI\Tests;
 use AlisQI\TwigQI\Assertion\WrapTypesInAssertedTypes;
 use AlisQI\TwigQI\Extension;
 use AlisQI\TwigQI\Tests\Type\Enom;
-use AlisQI\TwigQI\Tests\Type\Treated;
+use AlisQI\TwigQI\Tests\Type\Traeted;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\Log\LoggerInterface;
 use Twig\Extension\ExtensionInterface;
@@ -126,6 +126,10 @@ class TypeAssertionsTest extends AbstractTestCase
             
             ['\\\\AlisQI\\\\TwigQI\\\\Tests\\\\Type\\\\Enom', Enom::This, true],
             ['\\\\AlisQI\\\\TwigQI\\\\Tests\\\\Type\\\\Enom', new Node(), false],
+            
+            ['\\\\AlisQI\\\\TwigQI\\\\Tests\\\\Type\\\\Traet', new Traeted(), true],
+            ['\\\\AlisQI\\\\TwigQI\\\\Tests\\\\Type\\\\Traet[]', [new Traeted()], true],
+            ['\\\\AlisQI\\\\TwigQI\\\\Tests\\\\Type\\\\Traet', new Node(), false],
 
             ['iterable', [], true],
             ['iterable', [13, 37], true],

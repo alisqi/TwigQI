@@ -1,3 +1,6 @@
+# 3.0.1
+ * Bugfix: runtime type assertions support traits
+
 # 3.0.0
 
  * Implement #2: Psr\Logger

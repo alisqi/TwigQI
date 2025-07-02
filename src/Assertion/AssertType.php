@@ -21,8 +21,15 @@ final class AssertType
             return self::iterableMatches($value, $valueType, $keyType ?: null);
         }
 
-        // assert class or interface names
-        if (str_starts_with($type, '\\')) {
+        // assert class, interface, trait and enum names
+        if (str_starts_with($type, '\\')) { // must be FQN
+            if (trait_exists($type)) {
+                return in_array(
+                    substr($type, 1), // strip leading slash (even though trait_exists works with leading slash - WHY?)
+                    class_uses($value),
+                    true
+                );
+            }
             return $value instanceof $type;
         }
 

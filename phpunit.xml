@@ -11,6 +11,8 @@
             <exclude>./tests/AbstractTestCase.php</exclude>
             <exclude>./tests/Type/Dummy.php</exclude>
             <exclude>./tests/Type/Enom.php</exclude>
+            <exclude>./tests/Type/Traet.php</exclude>
+            <exclude>./tests/Type/Traeted.php</exclude>
         </testsuite>
     </testsuites>
 
