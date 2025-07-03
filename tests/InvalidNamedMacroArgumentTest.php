@@ -66,7 +66,7 @@ class InvalidNamedMacroArgumentTest extends AbstractTestCase
     }
 
     #[DataProvider('getTests')]
-    public function test_itDoesNotWarnForProperOrder(string $template, bool $isValid): void
+    public function test_itValidatesNamedArguments(string $template, bool $isValid): void
     {
         $this->env->createTemplate($template);
 
