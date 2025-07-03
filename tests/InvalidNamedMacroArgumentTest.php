@@ -62,6 +62,43 @@ class InvalidNamedMacroArgumentTest extends AbstractTestCase
                 EOF,
                 false
             ],
+            
+            // multiple macros
+            [
+                <<<EOF
+                {% macro marco(polo) %}{% endmacro %}
+                {% macro polo(marco) %}{% endmacro %}
+                {{ _self.marco(polo: 1) }}
+                {{ _self.polo(marco: 1) }}
+                EOF,
+                true
+            ],
+            [
+                <<<EOF
+                {% macro marco(polo) %}{% endmacro %}
+                {% macro polo(marco) %}{% endmacro %}
+                {{ _self.marco(polo: 1) }}
+                {{ _self.polo( polo: 1) }}
+                EOF,
+                false
+            ],
+            
+            // macro definition after reference
+            [
+                <<<EOF
+                {{ _self.marco() }}
+                {% macro marco() %}{% endmacro %}
+                EOF,
+                true
+            ],
+            
+            [
+                <<<EOF
+                {{ _self.marco(nope: 1) }}
+                {% macro marco(polo) %}{% endmacro %}
+                EOF,
+                false
+            ],
         ];
     }
 

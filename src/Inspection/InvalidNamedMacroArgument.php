@@ -9,12 +9,14 @@ use Psr\Log\LoggerInterface;
 use Twig\Environment;
 use Twig\Node\Expression\MacroReferenceExpression;
 use Twig\Node\MacroNode;
+use Twig\Node\ModuleNode;
 use Twig\Node\Node;
 use Twig\NodeVisitor\NodeVisitorInterface;
 
 class InvalidNamedMacroArgument implements NodeVisitorInterface
 {
-    private array $macroReferences = [];
+    /** @var array<string, MacroNode> */
+    private array $macroNodes = [];
     
     public function __construct(
         private readonly LoggerInterface $logger,
@@ -23,42 +25,56 @@ class InvalidNamedMacroArgument implements NodeVisitorInterface
 
     public function enterNode(Node $node, Environment $env): Node
     {
-        // We're visiting the macro calls _before_ their definition, so we need to first store the calls
-        // and then validate them once we run across the matching definition.
+        if ($node instanceof ModuleNode) {
+            $this->macroNodes += iterator_to_array($node->getNode('macros'));
+        }
         
         if ($node instanceof MacroReferenceExpression) {
-            $this->macroReferences[] = $node;
+            $this->checkReference($node);
         }
         
-        if ($node instanceof MacroNode) {
-            $this->checkMacro($node);
-        }
-
         return $node;
     }
 
-    private function checkMacro(MacroNode $node): void
+    private function checkReference(MacroReferenceExpression $node): void
     {
+        $macroName = substr($node->getAttribute('name'), strlen('macro_'));
+        try {
+            $signature = $this->createSignature($macroName);
+        } catch (\InvalidArgumentException $e) {
+            $this->logger->error(
+                 sprintf(
+                    "{$e->getMessage()} (at %s)",
+                    new NodeLocation($node)
+                )
+            );
+            return;
+        }
+
+        if (!empty($invalidArguments = $this->checkCall($node, $signature))) {
+            $this->logger->error(
+                sprintf(
+                    "Invalid named macro argument(s) %s (at %s)",
+                    implode(', ', $invalidArguments),
+                    new NodeLocation($node)
+                ),
+            );
+        }
+    }
+
+    /**
+     * @return string[]
+     * @throws \InvalidArgumentException
+     */
+    private function createSignature(string $macroName): array
+    {
+        $macroNode = $this->macroNodes[$macroName] ?? throw new \InvalidArgumentException("Unknown macro '$macroName'");
+
         $signature = [];
-        foreach ($node->getNode('arguments')->getKeyValuePairs() as ['key' => $key]) {
+        foreach ($macroNode->getNode('arguments')->getKeyValuePairs() as ['key' => $key]) {
             $signature[] = $key->getAttribute('name');
         }
-
-        foreach ($this->macroReferences as $macroReference) {
-            if ($macroReference->getAttribute('name') !== ('macro_' . $node->getAttribute('name'))) {
-                continue;
-            }
-
-            if (!empty($invalidArguments = $this->checkCall($macroReference, $signature))) {
-                $this->logger->error(
-                    sprintf(
-                        "Invalid named macro argument(s) %s (at %s)",
-                        implode(', ', $invalidArguments),
-                        new NodeLocation($node)
-                    ),
-                );
-            }
-        }
+        return $signature;
     }
 
     /** @return string[] */
