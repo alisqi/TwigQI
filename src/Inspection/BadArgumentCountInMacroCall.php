@@ -10,24 +10,14 @@ use Twig\Environment;
 use Twig\Node\Expression\MacroReferenceExpression;
 use Twig\Node\Expression\Variable\ContextVariable;
 use Twig\Node\MacroNode;
+use Twig\Node\ModuleNode;
 use Twig\Node\Node;
 use Twig\NodeVisitor\NodeVisitorInterface;
 
 class BadArgumentCountInMacroCall implements NodeVisitorInterface
 {
-    /**
-     * The top-level array has the macro's name as keys and its calls as value.
-     * Each call is represented as an array containing the number of arguments
-     * and the source location of the call.
-     *
-     * For example:
-     * ```php
-     * ['marco' => [[1, NodeLocation]]];
-     * ```
-     *
-     * @var array<string, array<array{0: int, 1: NodeLocation}>>
-     */
-    private array $macroCalls = [];
+    /** @var array<string, MacroNode> */
+    private array $macroNodes = [];
 
     public function __construct(
         private readonly LoggerInterface $logger,
@@ -36,76 +26,84 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
 
     public function enterNode(Node $node, Environment $env): Node
     {
-        /*
-         * `MethodCallExpression`s are entered before `MacroNode`s, even if the call precedes the macro tag!
-         * Therefore, we log `MethodCallExpression`s and check them when entering the `MacroNode`s.
-         */
-        if ($node instanceof MacroNode) {
-            // when visiting a macro declaration, check logged calls
-            $macroName = $node->getAttribute('name');
+        if ($node instanceof ModuleNode) {
+            $this->macroNodes += iterator_to_array($node->getNode('macros'));
+        }
 
-            $signature = [];
-            foreach ($node->getNode('arguments')->getKeyValuePairs() as ['key' => $key, 'value' => $default]) {
-                $name = $key->getAttribute('name');
-                $signature[] = [
-                    'name' => $name,
-                    'required' => $default->hasAttribute('is_implicit') // if attr is set, it's always true
-                ];
-            }
-
-            // add 'varargs' to signature if it's used anywhere (i.e., there's a ContextVariable that uses it)
-            if ($this->hasVarArgsContextVariableDescendant($node)) {
-                $signature[] = ['name' => MacroNode::VARARGS_NAME, 'required' => false];
-            }
-
-            $this->checkCalls($macroName, $signature);
-
-            unset($this->macroCalls[$macroName]); // remove logged calls to prevent collisions (macro with identical name in another template)
-        } elseif ($node instanceof MacroReferenceExpression) {
-            // when visiting a function call, log call
-            $macroName = substr($node->getAttribute('name'), strlen('macro_'));
-
-            $location = new NodeLocation($node);
-
-            $argumentCount = count($node->getNode('arguments')->getKeyValuePairs());
-
-            $this->macroCalls[$macroName][] = [$argumentCount, $location];
+        if ($node instanceof MacroReferenceExpression) {
+            $this->checkReference($node);
         }
 
         return $node;
     }
+    
+    private function checkReference(MacroReferenceExpression $node): void
+    {
+        $location = new NodeLocation($node);
+        
+        $macroName = substr($node->getAttribute('name'), strlen('macro_'));
+        try {
+            $signature = $this->createSignature($macroName);
+        } catch (\InvalidArgumentException $e) {
+            $this->logger->error(
+                 sprintf(
+                    "{$e->getMessage()} (at %s)",
+                    new NodeLocation($node)
+                )
+            );
+            return;
+        }
+        
+        $argumentCount = count($node->getNode('arguments')->getKeyValuePairs());
+        
+        // check for too _many_ arguments
+        $usesVarArgs = array_filter(
+            $signature,
+            static fn(array $argument) => $argument['name'] === MacroNode::VARARGS_NAME
+        );
+        if (
+            !$usesVarArgs &&
+            $argumentCount > count($signature)
+        ) {
+            $this->logger->warning(
+                "Too many arguments ($argumentCount) for macro '$macroName' (at $location)",
+            );
+        }
+
+        // check for too _few_ arguments
+        $requiredArguments = array_filter(
+            $signature,
+            static fn(array $param) => $param['required']
+        );
+        if ($argumentCount < count($requiredArguments)) {
+            $this->logger->warning(
+                "Too few arguments ($argumentCount) for macro '$macroName' (at $location)",
+            );
+        }
+    }
 
     /**
-     * @param array<array{name: string, required: bool}> $signature
+     * @return array{name: string, required: bool}
+     * @throws \InvalidArgumentException
      */
-    private function checkCalls(string $macro, array $signature): void
+    private function createSignature(string $macroName): array
     {
-        foreach (($this->macroCalls[$macro] ?? []) as [$argumentCount, $location]) {
-            // check for too _many_ arguments
-            $usesVarArgs = array_filter(
-                $signature,
-                static fn(array $argument) => $argument['name'] === MacroNode::VARARGS_NAME
-            );
-            if (
-                !$usesVarArgs &&
-                $argumentCount > count($signature)
-            ) {
-                $this->logger->warning(
-                    "Too many arguments ($argumentCount) for macro '$macro' (at $location)",
-                );
-            }
+        $macroNode = $this->macroNodes[$macroName] ?? throw new \InvalidArgumentException("Unknown macro '$macroName'");
 
-            // check for too _few_ arguments
-            $requiredArguments = array_filter(
-                $signature,
-                static fn(array $param) => $param['required']
-            );
-            if ($argumentCount < count($requiredArguments)) {
-                $this->logger->warning(
-                    "Too few arguments ($argumentCount) for macro '$macro' (at $location)",
-                );
-            }
+        $signature = [];
+        foreach ($macroNode->getNode('arguments')->getKeyValuePairs() as ['key' => $key, 'value' => $default]) {
+            $name = $key->getAttribute('name');
+            $signature[] = [
+                'name' => $name,
+                'required' => $default->hasAttribute('is_implicit') // if attr is set, it's always true
+            ];
         }
+
+        // add 'varargs' to signature if it's used anywhere (i.e., there's a ContextVariable that uses it)
+        if ($this->hasVarArgsContextVariableDescendant($macroNode)) {
+            $signature[] = ['name' => MacroNode::VARARGS_NAME, 'required' => false];
+        }
+        return $signature;
     }
 
     public function leaveNode(Node $node, Environment $env): Node
