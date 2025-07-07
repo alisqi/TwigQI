@@ -1,0 +1,15 @@
+{% macro one() %}
+{% endmacro %}
+
+{% macro two() %}
+    {{ _self.one() }}
+{% endmacro %}
+
+{% macro three() %}
+    {% from 'marco.twig' import marco %}
+    {{ marco(1) }}
+{% endmacro %}
+
+{{ _self.one() }}
+{{ _self.two() }}
+{{ _self.three() }}

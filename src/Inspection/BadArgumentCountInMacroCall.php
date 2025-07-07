@@ -135,6 +135,7 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
     {
         if ($node instanceof ModuleNode && !$this->currentlyImporting) {
             $this->macroNodes = [];
+            $this->importedTemplates = [];
         }
         
         return $node;

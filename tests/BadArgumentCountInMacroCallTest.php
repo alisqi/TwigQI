@@ -191,6 +191,17 @@ class BadArgumentCountInMacroCallTest extends AbstractTestCase
 
         self::addToAssertionCount(1);
     }
+    
+    public function test_multipleMacros(): void
+    {
+        $this->env->setLoader(
+            new FilesystemLoader(__DIR__ . '/fixtures')
+        );
+
+        $this->env->load('multiple-macros.twig');
+
+        self::addToAssertionCount(1);
+    }
 
     public function test_duplicateMacroNamesInDifferentFiles(): void
     {
