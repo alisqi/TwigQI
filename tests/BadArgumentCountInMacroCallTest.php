@@ -148,16 +148,16 @@ class BadArgumentCountInMacroCallTest extends AbstractTestCase
             ['{% from "marco.twig" import marco %} {{ marco() }}', false],
 
             // from ... import with alias
-            ['{% from "marco.twig" import marco as polo %} {{ polo() }}', false],
             ['{% from "marco.twig" import marco as polo %} {{ polo(1) }}', true],
+            ['{% from "marco.twig" import marco as polo %} {{ polo() }}', false],
 
-            [
-                '{% from "marco.twig" import marco as polo %} {% macro marco(polo) %}{% endmacro %} {{ _self.marco() }}',
-                false
-            ],
             [
                 '{% from "marco.twig" import marco as polo %} {% macro marco(polo) %}{% endmacro %} {{ _self.marco(1) }}',
                 true
+            ],
+            [
+                '{% from "marco.twig" import marco as polo %} {% macro marco(polo) %}{% endmacro %} {{ _self.marco() }}',
+                false
             ],
 
             // import
