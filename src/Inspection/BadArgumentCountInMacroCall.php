@@ -4,68 +4,16 @@ declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Inspection;
 
+use AlisQI\TwigQI\Helper\MacroReferenceVisitor;
 use AlisQI\TwigQI\Helper\NodeLocation;
-use Psr\Log\LoggerInterface;
-use Twig\Environment;
-use Twig\Error\LoaderError;
-use Twig\Error\SyntaxError;
-use Twig\Node\Expression\ConstantExpression;
 use Twig\Node\Expression\MacroReferenceExpression;
 use Twig\Node\Expression\Variable\ContextVariable;
-use Twig\Node\ImportNode;
 use Twig\Node\MacroNode;
-use Twig\Node\ModuleNode;
 use Twig\Node\Node;
-use Twig\NodeVisitor\NodeVisitorInterface;
 
-class BadArgumentCountInMacroCall implements NodeVisitorInterface
+class BadArgumentCountInMacroCall extends MacroReferenceVisitor
 {
-    private bool $currentlyImporting = false;
-    
-    /** @var string[] */
-    private array $importedTemplates = [];
-    
-    /** @var array<string, MacroNode> */
-    private array $macroNodes = [];
-
-    public function __construct(
-        private readonly LoggerInterface $logger,
-    ) {
-    }
-
-    public function enterNode(Node $node, Environment $env): Node
-    {
-        if ($node instanceof ModuleNode) {
-            $this->macroNodes += iterator_to_array($node->getNode('macros'));
-        }
-        
-        if ($node instanceof ImportNode && !$this->currentlyImporting) {
-            $this->currentlyImporting = true;
-            $this->import($env, $node);
-            $this->currentlyImporting = false;
-        }
-
-        if ($node instanceof MacroReferenceExpression && !$this->currentlyImporting) {
-            $this->checkReference($node);
-        }
-
-        return $node;
-    }
-
-    private function import(Environment $env, ImportNode $node): void
-    {
-        if (!($expr = $node->getNode('expr')) instanceof ConstantExpression) {
-            return;
-        }
-        
-        $templateName = $expr->getAttribute('value');
-        if (!in_array($templateName, $this->importedTemplates, true)) {
-            $this->importedTemplates[] = $templateName;
-            $env->compileSource($env->getLoader()->getSourceContext($templateName));
-        }
-    }
-    
-    private function checkReference(MacroReferenceExpression $node): void
+    protected function checkReference(MacroReferenceExpression $node): void
     {
         $location = new NodeLocation($node);
         
@@ -126,21 +74,6 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
             $signature[] = ['name' => MacroNode::VARARGS_NAME, 'required' => false];
         }
         return $signature;
-    }
-
-    public function leaveNode(Node $node, Environment $env): Node
-    {
-        if ($node instanceof ModuleNode && !$this->currentlyImporting) {
-            $this->macroNodes = [];
-            $this->importedTemplates = [];
-        }
-        
-        return $node;
-    }
-
-    public function getPriority(): int
-    {
-        return 0;
     }
 
     private function hasVarArgsContextVariableDescendant(Node $node): bool
