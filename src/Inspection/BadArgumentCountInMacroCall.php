@@ -38,11 +38,13 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
             $this->macroNodes += iterator_to_array($node->getNode('macros'));
         }
         
-        if ($node instanceof ImportNode) {
+        if ($node instanceof ImportNode && !$this->currentlyImporting) {
+            $this->currentlyImporting = true;
             $this->import($env, $node);
+            $this->currentlyImporting = false;
         }
 
-        if ($node instanceof MacroReferenceExpression) {
+        if ($node instanceof MacroReferenceExpression && !$this->currentlyImporting) {
             $this->checkReference($node);
         }
 
@@ -51,15 +53,11 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
 
     private function import(Environment $env, ImportNode $node): void
     {
-        $this->currentlyImporting = true;
-
         $templateName = $node->getNode('expr')->getAttribute('value');
         if (!in_array($templateName, $this->importedTemplates, true)) {
             $this->importedTemplates[] = $templateName;
             $env->compileSource($env->getLoader()->getSourceContext($templateName));
         }
-
-        $this->currentlyImporting = false;
     }
     
     private function checkReference(MacroReferenceExpression $node): void

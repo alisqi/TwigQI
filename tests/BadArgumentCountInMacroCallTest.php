@@ -7,6 +7,7 @@ namespace AlisQI\TwigQI\Tests;
 use AlisQI\TwigQI\Extension;
 use AlisQI\TwigQI\Inspection\BadArgumentCountInMacroCall;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use Psr\Log\LoggerInterface;
 use Twig\Extension\ExtensionInterface;
 use Twig\Loader\FilesystemLoader;
@@ -201,6 +202,25 @@ class BadArgumentCountInMacroCallTest extends AbstractTestCase
         $this->env->load('multiple-macros.twig');
 
         self::addToAssertionCount(1);
+    }
+    
+    #[TestWith(["", true])]
+    #[TestWith(["1", false])]
+    public function test_conflictingLocalAndImportedMacro(string $marcoArgs, bool $isValid): void
+    {
+        $this->env->setLoader(
+            new FilesystemLoader(__DIR__ . '/fixtures')
+        );
+        
+        $this->env->createTemplate(<<<TWIG
+            {% from "multiple-macros.twig" import one %}
+            {% macro marco() %}{% endmacro %}
+            
+            {{ one() }}
+            {{ _self.marco($marcoArgs) }}
+        TWIG);
+
+        self::assertEquals($isValid, empty($this->errors));
     }
 
     public function test_duplicateMacroNamesInDifferentFiles(): void
