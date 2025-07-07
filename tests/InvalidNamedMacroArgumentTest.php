@@ -9,6 +9,7 @@ use AlisQI\TwigQI\Inspection\InvalidNamedMacroArgument;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\Log\LoggerInterface;
 use Twig\Extension\ExtensionInterface;
+use Twig\Loader\FilesystemLoader;
 
 class InvalidNamedMacroArgumentTest extends AbstractTestCase
 {
@@ -112,5 +113,47 @@ class InvalidNamedMacroArgumentTest extends AbstractTestCase
             empty($this->errors),
             implode(', ', $this->errors)
         );
+    }
+    
+    public static function getImportedMacroTests(): array
+    {
+        return [
+            // from ... import
+            ['{% from "marco.twig" import marco %} {{ marco(polo: 1) }}', true],
+            ['{% from "marco.twig" import marco %} {{ marco(olop: 1) }}', false],
+
+            // from ... import with alias
+            ['{% from "marco.twig" import marco as polo %} {{ polo(polo: 1) }}', true],
+            ['{% from "marco.twig" import marco as polo %} {{ polo(olop: 1) }}', false],
+
+            [
+                '{% from "marco.twig" import marco as polo %} {% macro marco(olop) %}{% endmacro %} {{ _self.marco(olop: 1) }}',
+                true
+            ],
+            [
+                '{% from "marco.twig" import marco as polo %} {% macro marco(olop) %}{% endmacro %} {{ _self.marco(polo: 1) }}',
+                false
+            ],
+
+            // import
+            ['{% import "marco.twig" as marco %} {{ marco.marco(polo: 1) }}', true],
+            ['{% import "marco.twig" as marco %} {{ marco.marco(olop: 1) }}', false],
+        ];
+    }
+
+    #[DataProvider('getImportedMacroTests')]
+    public function test_importedMacro(string $template, bool $isValid): void
+    {
+        $this->env->setLoader(
+            new FilesystemLoader(__DIR__ . '/fixtures')
+        );
+
+        $this->env->createTemplate($template);
+
+        self::assertEquals($isValid, empty($this->errors));
+
+        if (!$isValid) {
+            self::assertStringContainsStringIgnoringCase('Invalid named macro argument', $this->errors[0]);
+        }
     }
 }
