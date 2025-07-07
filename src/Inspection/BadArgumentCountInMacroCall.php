@@ -9,6 +9,7 @@ use Psr\Log\LoggerInterface;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\SyntaxError;
+use Twig\Node\Expression\ConstantExpression;
 use Twig\Node\Expression\MacroReferenceExpression;
 use Twig\Node\Expression\Variable\ContextVariable;
 use Twig\Node\ImportNode;
@@ -53,7 +54,11 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
 
     private function import(Environment $env, ImportNode $node): void
     {
-        $templateName = $node->getNode('expr')->getAttribute('value');
+        if (!($expr = $node->getNode('expr')) instanceof ConstantExpression) {
+            return;
+        }
+        
+        $templateName = $expr->getAttribute('value');
         if (!in_array($templateName, $this->importedTemplates, true)) {
             $this->importedTemplates[] = $templateName;
             $env->compileSource($env->getLoader()->getSourceContext($templateName));
@@ -67,13 +72,7 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
         $macroName = substr($node->getAttribute('name'), strlen('macro_'));
         try {
             $signature = $this->createSignature($macroName);
-        } catch (\InvalidArgumentException $e) {
-            $this->logger->error(
-                 sprintf(
-                    "{$e->getMessage()} (at %s)",
-                    new NodeLocation($node)
-                )
-            );
+        } catch (\InvalidArgumentException) {
             return;
         }
         

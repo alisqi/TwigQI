@@ -244,4 +244,19 @@ class BadArgumentCountInMacroCallTest extends AbstractTestCase
 
         self::assertEmpty($this->errors, implode(', ', $this->errors));
     }
+    
+    public function test_dynamicImport(): void
+    {
+        $this->env->setLoader(
+            new FilesystemLoader(__DIR__ . '/fixtures')
+        );
+        
+        $this->env->createTemplate(<<<TWIG
+            {% set template = "multiple-macros.twig" %}
+            {% from template import one %}
+            {{ one() }}
+        TWIG);
+        
+        self::assertEmpty($this->errors, implode(', ', $this->errors));
+    }
 }
