@@ -7,8 +7,11 @@ namespace AlisQI\TwigQI\Inspection;
 use AlisQI\TwigQI\Helper\NodeLocation;
 use Psr\Log\LoggerInterface;
 use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\SyntaxError;
 use Twig\Node\Expression\MacroReferenceExpression;
 use Twig\Node\Expression\Variable\ContextVariable;
+use Twig\Node\ImportNode;
 use Twig\Node\MacroNode;
 use Twig\Node\ModuleNode;
 use Twig\Node\Node;
@@ -16,6 +19,11 @@ use Twig\NodeVisitor\NodeVisitorInterface;
 
 class BadArgumentCountInMacroCall implements NodeVisitorInterface
 {
+    private bool $currentlyImporting = false;
+    
+    /** @var string[] */
+    private array $importedTemplates = [];
+    
     /** @var array<string, MacroNode> */
     private array $macroNodes = [];
 
@@ -29,12 +37,29 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
         if ($node instanceof ModuleNode) {
             $this->macroNodes += iterator_to_array($node->getNode('macros'));
         }
+        
+        if ($node instanceof ImportNode) {
+            $this->import($env, $node);
+        }
 
         if ($node instanceof MacroReferenceExpression) {
             $this->checkReference($node);
         }
 
         return $node;
+    }
+
+    private function import(Environment $env, ImportNode $node): void
+    {
+        $this->currentlyImporting = true;
+
+        $templateName = $node->getNode('expr')->getAttribute('value');
+        if (!in_array($templateName, $this->importedTemplates, true)) {
+            $this->importedTemplates[] = $templateName;
+            $env->compileSource($env->getLoader()->getSourceContext($templateName));
+        }
+
+        $this->currentlyImporting = false;
     }
     
     private function checkReference(MacroReferenceExpression $node): void
@@ -108,6 +133,10 @@ class BadArgumentCountInMacroCall implements NodeVisitorInterface
 
     public function leaveNode(Node $node, Environment $env): Node
     {
+        if ($node instanceof ModuleNode && !$this->currentlyImporting) {
+            $this->macroNodes = [];
+        }
+        
         return $node;
     }
 
