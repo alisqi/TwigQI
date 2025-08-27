@@ -4,14 +4,10 @@ declare(strict_types=1);
 
 namespace AlisQI\TwigQI\Helper;
 
-use AlisQI\TwigQI\Helper\NodeLocation;
 use Psr\Log\LoggerInterface;
 use Twig\Environment;
-use Twig\Error\LoaderError;
-use Twig\Error\SyntaxError;
 use Twig\Node\Expression\ConstantExpression;
 use Twig\Node\Expression\MacroReferenceExpression;
-use Twig\Node\Expression\Variable\ContextVariable;
 use Twig\Node\ImportNode;
 use Twig\Node\MacroNode;
 use Twig\Node\ModuleNode;

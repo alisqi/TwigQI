@@ -13,7 +13,6 @@ use Twig\Environment;
 use Twig\Node\Expression\ArrowFunctionExpression;
 use Twig\Node\Expression\ConstantExpression;
 use Twig\Node\Expression\GetAttrExpression;
-use Twig\Node\Expression\NameExpression;
 use Twig\Node\Expression\Variable\ContextVariable;
 use Twig\Node\ForNode;
 use Twig\Node\MacroNode;
