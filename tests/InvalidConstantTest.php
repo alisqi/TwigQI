@@ -26,6 +26,7 @@ class InvalidConstantTest extends AbstractTestCase
             ['DATE_W3C', true],
             ['DateTime', false],
             ['DateTime::W3C', true],
+            ['\\\\DateTime::W3C', true],
             ['DateTime::NOPE', false],
             ['Twig\\\\Token::ARROW_TYPE', true],
             ['Twig\\\\Token::NOPE', false],

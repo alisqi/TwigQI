@@ -280,6 +280,21 @@ class InvalidDotOperationTest extends AbstractTestCase
         );
     }
 
+    public function test_itSupportsFQNWithoutLeadingSlash(): void
+    {
+        $this->env->createTemplate(
+            <<<EOF
+            {% types {foo: 'Exception'} %}
+            {{ foo.message }}
+        EOF
+        );
+
+        self::assertEmpty(
+            $this->errors,
+            "FQN without leading slash should be accepted"
+        );
+    }
+    
     public static function getAttributeShorthands(): array
     {
         $dummyClassFqn = '\\\\AlisQI\\\\TwigQI\\\\Tests\\\\Type\\\\Dummy';

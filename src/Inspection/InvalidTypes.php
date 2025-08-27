@@ -29,7 +29,7 @@ class InvalidTypes implements NodeVisitorInterface
         'float' => 'number',
     ];
 
-    private const FQN_REGEX = '/^\\\\[A-Za-z_][A-Za-z0-9_]*(\\\\[A-Za-z_][A-Za-z0-9_]*)*$/';
+    private const FQN_REGEX = '/^(\\\\)?[A-Za-z_][A-Za-z0-9_]*(\\\\[A-Za-z_][A-Za-z0-9_]*)*$/';
 
     public function __construct(
         private readonly LoggerInterface $logger,

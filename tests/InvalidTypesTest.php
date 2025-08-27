@@ -37,12 +37,13 @@ class InvalidTypesTest extends AbstractTestCase
             ["any", false],
             ["resource", false],
             
-            ["\\\\Exception", true],
-            ["\\\\Iterator", true],
+            ["\\\\Exception", true], // class
+            ["\\\\Iterator", true], // interface
             ["\\\\AlisQI\\\\TwigQI\\\\Tests\\\\Type\\\\Enom", true],
             ["\\\\AlisQI\\\\TwigQI\\\\Tests\\\\Type\\\\Traet", true],
             ["\\\\Twig\\\\Token", true],
-            ["Exception", false],
+            ["Exception", true], // leading \ is optional
+            ["Twig\\\\Token", true],
             ["\\\\Foo", false],
             ["\\\\Inv alid", false],
             ["\\\\Inv-alid", false],

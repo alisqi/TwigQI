@@ -22,10 +22,11 @@ class InvalidEnumCaseTest extends AbstractTestCase
 
     public static function getEnomCases(): array
     {
-        $enum = '\\\\AlisQI\\\\TwigQI\\\\Tests\\\\Type\\\\Enom';
+        $enum = 'AlisQI\\\\TwigQI\\\\Tests\\\\Type\\\\Enom';
 
         return [
             [$enum, 'This', true],
+            ["\\\\$enum", 'This', true],
             [$enum, 'That', true],
             [$enum, 'Invalid', false],
             [$enum, 'cases', true],

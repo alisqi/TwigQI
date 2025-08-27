@@ -1,3 +1,6 @@
+# 3.1.1
+ * Feature (/ bugfix 😉): leading backslash in FQN is optional
+
 # 3.1.0
  * Feature: Detect invalid named arguments in macro calls
 
