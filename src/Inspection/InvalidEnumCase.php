@@ -37,15 +37,13 @@ class InvalidEnumCase implements NodeVisitorInterface
     {
         $location = new NodeLocation($node);
 
-        $enumClass = $node->getNode('node')->getNode('arguments')->getNode('0')->getAttribute('value');
-        $case = $node->getNode('attribute')->getAttribute('value');
-
         // No need to test whether enum_exists, as Twig's EnumFunction does that already.
-
+        $case = $node->getNode('attribute')->getAttribute('value');
         if ($case === 'cases') {
             return;
         }
 
+        $enumClass = $node->getNode('node')->getNode('arguments')->getNode('0')->getAttribute('value');
         foreach ($enumClass::cases() as $enumCase) {
             if ($enumCase->name === $case) {
                 return;
