@@ -7,6 +7,7 @@ namespace AlisQI\TwigQI\Inspection;
 use Psr\Log\LoggerInterface;
 use Twig\Environment;
 use Twig\Node\Expression\ArrowFunctionExpression;
+use Twig\Node\Expression\SupportDefinedTestInterface;
 use Twig\Node\Expression\Variable\ContextVariable;
 use Twig\Node\ForNode;
 use Twig\Node\MacroNode;
@@ -113,7 +114,7 @@ class UndeclaredVariableInMacro implements NodeVisitorInterface
         $variableName = $node->getAttribute('name');
 
         if (
-            !$node->getAttribute('is_defined_test') &&
+            !$this->isDefinedTestEnabled($node) &&
             $variableName !== '_self' &&
             !str_starts_with($variableName, '__internal') &&
             !in_array($variableName, $this->declaredVariableNames, false) &&
@@ -129,6 +130,21 @@ class UndeclaredVariableInMacro implements NodeVisitorInterface
                 ),
             );
         }
+    }
+
+    /**
+     * Twig 3.21 deprecated the `is_defined_test` attribute in favor of `isDefinedTestEnabled()`.
+     * The interface does not exist in Twig < 3.21, which this library still supports.
+     *
+     * TODO: unnecessary check for Twig >= 3.21.0
+     */
+    private function isDefinedTestEnabled(ContextVariable $node): bool
+    {
+        if ($node instanceof SupportDefinedTestInterface) {
+            return $node->isDefinedTestEnabled();
+        }
+
+        return (bool)$node->getAttribute('is_defined_test');
     }
 
     public function getPriority(): int

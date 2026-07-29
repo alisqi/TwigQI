@@ -9,6 +9,7 @@ use Psr\Log\LoggerInterface;
 use Twig\Environment;
 use Twig\Node\Expression\ConstantExpression;
 use Twig\Node\Expression\FunctionExpression;
+use Twig\Node\Expression\SupportDefinedTestInterface;
 use Twig\Node\Expression\Test\ConstantTest;
 use Twig\Node\Expression\Variable\ContextVariable;
 use Twig\Node\Node;
@@ -40,7 +41,7 @@ class InvalidConstant implements NodeVisitorInterface
         // ignore `constant('foo') is defined`
         if (
             $node instanceof FunctionExpression &&
-            $node->getAttribute('is_defined_test')
+            $this->isDefinedTestEnabled($node)
         ) {
             return;
         }
@@ -60,6 +61,21 @@ class InvalidConstant implements NodeVisitorInterface
         if ($error) {
             $this->logger->error("Invalid constant() call: $error (at $location)");
         }
+    }
+
+    /**
+     * Twig 3.21 deprecated the `is_defined_test` attribute in favor of `isDefinedTestEnabled()`.
+     * The interface does not exist in Twig < 3.21, which this library still supports.
+     *
+     * TODO: unnecessary check for Twig >= 3.21.0
+     */
+    private function isDefinedTestEnabled(FunctionExpression $node): bool
+    {
+        if ($node instanceof SupportDefinedTestInterface) {
+            return $node->isDefinedTestEnabled();
+        }
+
+        return (bool)$node->getAttribute('is_defined_test');
     }
 
     private function checkConstant(Node $node): ?string
