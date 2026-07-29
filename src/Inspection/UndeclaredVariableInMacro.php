@@ -135,6 +135,8 @@ class UndeclaredVariableInMacro implements NodeVisitorInterface
     /**
      * Twig 3.21 deprecated the `is_defined_test` attribute in favor of `isDefinedTestEnabled()`.
      * The interface does not exist in Twig < 3.21, which this library still supports.
+     *
+     * TODO: unnecessary check for Twig >= 3.21.0
      */
     private function isDefinedTestEnabled(ContextVariable $node): bool
     {
