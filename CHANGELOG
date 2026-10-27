@@ -1,3 +1,11 @@
+# 3.1.3
+ * Bugfix: no more `is_defined_test` deprecations on Twig >= 3.21 (thanks @annadamm-check24)
+ * Bugfix: avoid PHP 8.2 deprecation (`Use of "static" in callables`) when parsing docblocks,
+    by conflicting with webmozart/assert < 1.11
+
+# 3.1.2
+ * Bugfix: syntax error on `enum(FQN).cases()`
+
 # 3.1.1
  * Feature (/ bugfix 😉): leading backslash in FQN is optional
 
