@@ -1,11 +1,12 @@
 FROM php:8.2-cli
 
-RUN apt update
-RUN apt install unzip
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends unzip \
+    && rm -rf /var/lib/apt/lists/*
 RUN pecl install xdebug-3.3.2
 RUN docker-php-ext-enable xdebug
 
-COPY --from=composer:2.1 /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
