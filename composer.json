@@ -27,5 +27,8 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^11.5.50"
+    },
+    "conflict": {
+        "webmozart/assert": "<1.11"
     }
 }
