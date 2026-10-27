@@ -1,6 +1,6 @@
-# .github/workflows/php.yml
+# .github/workflows/test.yml
 
-name: PHPUnit with coverage
+name: PHPUnit
 
 on:
   push:
@@ -10,20 +10,33 @@ on:
 
 jobs:
   build:
+    name: PHP ${{ matrix.php }} (${{ matrix.dependencies }} dependencies)
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2']
+        dependencies: ['locked', 'lowest']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
+
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
-      - name: Install dependencies
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - name: Install locked dependencies
+        if: matrix.dependencies == 'locked'
         run: composer install
-      - name: Run tests with coverage
-        run: vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          files: coverage.xml
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Install lowest dependencies
+        if: matrix.dependencies == 'lowest'
+        run: composer update --prefer-lowest --prefer-stable
+
+      - name: Check for security advisories
+        if: matrix.dependencies == 'locked'
+        run: composer audit
+
+      - name: Run tests
+        run: vendor/bin/phpunit

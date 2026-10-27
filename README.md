@@ -4,7 +4,6 @@
 [![PHP Version](https://img.shields.io/badge/php-%3E%3D%208.2-8892BF.svg)](https://php.net)
 ![Stability](https://img.shields.io/badge/stability-stable-brightgreen)
 [![Build Status](https://github.com/alisqi/TwigQI/actions/workflows/test.yml/badge.svg)](https://github.com/alisqi/TwigQI/actions)
-[![codecov](https://codecov.io/gh/alisqi/TwigQI/graph/badge.svg?token=G3AE3RE4K0)](https://codecov.io/gh/alisqi/TwigQI)
 
 Twig Quality Inspections is an extension to the [Twig templating](https://github.com/twigphp/Twig) engine
 which adds static analysis (i.e., compile-time) inspections and runtime assertions to increase templates' quality.
