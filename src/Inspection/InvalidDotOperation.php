@@ -7,6 +7,7 @@ namespace AlisQI\TwigQI\Inspection;
 use AlisQI\TwigQI\Helper\NodeLocation;
 use AlisQI\TwigQI\Helper\VariableTypeCollector;
 use phpDocumentor\Reflection\DocBlockFactory;
+use phpDocumentor\Reflection\Types\ContextFactory;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use Twig\Environment;
@@ -112,21 +113,38 @@ class InvalidDotOperation implements NodeVisitorInterface
             return;
         }
 
-        $rc = new ReflectionClass($type); // ValidTypes already ensure the type is, well, valid.
+        // ValidTypes already ensure the type is, well, valid.
+        if (!$this->isOperationValidOnObject(new ReflectionClass($type), $type, $attribute, $location)) {
+            $this->logger->error(
+                "Invalid attribute '$attribute' for type '$type' (at $location)'",
+            );
+        }
+    }
 
+    private function isOperationValidOnObject(ReflectionClass $rc, string $type, string $attribute, NodeLocation $location): bool
+    {
         // property
         if (
             $rc->hasProperty($attribute) &&
             $rc->getProperty($attribute)->isPublic()
         ) {
-            return;
+            return true;
         }
 
-        // dynamic property
         if (false !== $docBlock = $rc->getDocComment()) {
+            // dynamic property
             foreach (DocBlockFactory::createInstance()->create($docBlock)->getTagsWithTypeByName('property') as $tag) {
                 if ($attribute === $tag->getVariableName()) {
-                    return;
+                    return true;
+                }
+            }
+
+            // mixin
+            $context = (new ContextFactory())->createFromReflector($rc);
+            foreach (DocBlockFactory::createInstance()->create($docBlock, $context)->getTagsWithTypeByName('mixin') as $tag) {
+                $mixin = new ReflectionClass((string) $tag->getType()->getFqsen());
+                if ($this->isOperationValidOnObject($mixin, $type, $attribute, $location)) {
+                    return true;
                 }
             }
         }
@@ -142,14 +160,12 @@ class InvalidDotOperation implements NodeVisitorInterface
             }
 
             if ($rc->getMethod($potentialMethod)->isPublic()) {
-                return;
+                return true;
             }
             break; // don't try other potential methods
         }
 
-        $this->logger->error(
-            "Invalid attribute '$attribute' for type '$type' (at $location)'",
-        );
+        return false;
     }
 
     public function leaveNode(Node $node, Environment $env): ?Node
