@@ -1,3 +1,6 @@
+> [!WARNING]
+> This package is abandoned and no longer maintained! Consider [TwigStan](https://github.com/twigstan/twigstan) as an alternative.
+
 # TwigQI: Static code analysis for Twig templates
 
 [![License](https://img.shields.io/github/license/alisqi/TwigQI.svg)](https://github.com/alisqi/TwigQI/blob/main/LICENSE)
